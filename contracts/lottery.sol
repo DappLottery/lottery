@@ -8,22 +8,24 @@ pragma solidity >=0.7.0 <0.9.0;
  */
 contract Lottery {
     // 플레이어 관련
-    address manager;
-    address public winner;
-    address[] public players;
+    address public manager;
+    address public lastWinner;
+    address payable[] public players;
 
     // 티켓 관련
     uint256 public ticketsBought = 0; // 현재 유저가 몇개 샀는지
-    uint64 ticketPrice = 0; // 가격
+    uint256 ticketPrice = .0001 ether; // 가격
     uint64 ticketMax = 1000; // 최대 구입 가능
+    uint256 public lotteryId;
 
     constructor() {
         manager = msg.sender;
+        lotteryId = 0;
     }
 
     // buyTickets 으로만 살 수 있어야 하니까
     fallback() external payable {
-        revert();
+        buyTickets();
     }
 
     // 다 팔림 modifier
@@ -37,8 +39,17 @@ contract Lottery {
         _;
     }
 
-    function enter() public payable {
-        require(msg.value > .001 eth);
+    modifier enoughMoney() {
+        if (msg.value < ticketPrice) {
+            throw;
+        } else {
+            _;
+        }
+    }
+
+    /** ------------ Functions ------------ **/
+
+    function enter() public payable enoughMoney {
         players.push(payable(msg.sender));
     }
 
@@ -58,12 +69,23 @@ contract Lottery {
         ticketsBought++;
     }
 
-    function sendMoney() {}
-
     function pickWinner() public restricted {
-        uint256 index = random() % players.length;
-        currentWinner = players[index];
-        players[index].transfer(address(this).balance);
+        uint256 randomIndex = random() % players.length;
+        players[randomIndex].transfer(address(this).balance);
+        lastWinner = players[randomIndex];
+        lotteryId++;
+
+        // players 초기화
         players = new address payable[](0);
+    }
+
+    /** ------------ Getter ------------ **/
+
+    function getWinner() public view returns (address) {
+        return lastWinner;
+    }
+
+    function getPlayers() public view returns (address payable[] memory) {
+        return players;
     }
 }
