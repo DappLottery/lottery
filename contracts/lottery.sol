@@ -8,7 +8,7 @@ pragma solidity >=0.7.0 <0.9.0;
  */
 contract Lottery {
     // 플레이어 관련
-    address currentPlayer;
+    address manager;
     address public winner;
     address[] public players;
 
@@ -17,8 +17,8 @@ contract Lottery {
     uint64 ticketPrice = 0; // 가격
     uint64 ticketMax = 1000; // 최대 구입 가능
 
-    function Lottery() {
-        currentPlayer = msg.sender;
+    constructor() {
+        manager = msg.sender;
     }
 
     // buyTickets 으로만 살 수 있어야 하니까
@@ -32,6 +32,25 @@ contract Lottery {
         _;
     }
 
+    modifier restricted() {
+        require(msg.sender == manager);
+        _;
+    }
+
+    function enter() public payable {
+        require(msg.value > .001 eth);
+        players.push(payable(msg.sender));
+    }
+
+    function random() private view returns (uint256) {
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(block.difficulty, block.timestamp, players)
+                )
+            );
+    }
+
     // 한번에 최대 20장은 살 수 있음
     function buyTickets() public payable returns (bool) {
         // require() ...
@@ -41,5 +60,10 @@ contract Lottery {
 
     function sendMoney() {}
 
-    function pickWinner() {}
+    function pickWinner() public restricted {
+        uint256 index = random() % players.length;
+        currentWinner = players[index];
+        players[index].transfer(address(this).balance);
+        players = new address payable[](0);
+    }
 }
