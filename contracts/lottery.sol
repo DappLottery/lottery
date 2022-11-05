@@ -11,6 +11,7 @@ contract Lottery {
     address public manager;
     address public lastWinner;
     address payable[] public players;
+    mapping (address => uint256) player2winnings;
 
     // 티켓 관련
     uint256 public ticketsBought = 0; // 현재 유저가 몇개 샀는지
@@ -84,5 +85,12 @@ contract Lottery {
 
     function getPlayers() public view returns (address payable[] memory) {
         return players;
+    }
+    
+    function receiveWinnings() external {
+        require(0 < player2winnings[msg.sender], "You have no winnings.");
+        uint256 toReceive = player2winnings[msg.sender];
+        player2winnings[msg.sender] = 0;
+        payable(msg.sender).transfer(toReceive);
     }
 }
