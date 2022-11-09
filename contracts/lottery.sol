@@ -8,7 +8,9 @@ contract Lottery {
     // 플레이어 관련
     address public manager;
     address public lastWinner;
-    address payable[] public players;
+    // address payable[] public players;
+
+    uint256 public contractBalance;
 
     /////////////////////////////////////////////////////
     // my code: 당첨자를 뽑는 코드
@@ -18,7 +20,8 @@ contract Lottery {
 
     struct Person {
         uint256 selectNumber;
-        address addr;
+        address payable addr;
+        uint256 matchCount;
     }
 
     mapping(uint256 => Person) people;
@@ -35,35 +38,6 @@ contract Lottery {
         }
     }
 
-    // function enter(): 이 때 참여하는 사람이 랜덤 넘버를 선택하고, (사람주소: 랜덤넘버)를 매핑??
-    function myEnter() public {
-        // 참여자는 enter 시에 8자리 번호를 넘긴다.
-        uint256 selectNum;
-        people[peopleCount++] = Person(selectNum, msg.sender);
-    }
-
-    function myPickWinner() public restricted {
-        uint256 matchCount = 0;
-        for (uint256 i = 0; i < peopleCount; i++) {
-            uint256 selectNumber = people[i].selectNumber;
-            address pAddr = people[i].addr;
-
-            for (uint256 j = 0; j < 4; j++) {
-                if (randomNumbers[j] == selectNumber % 100) matchCount++;
-                selectNumber /= 100;
-            }
-
-            // match count에 따라서 차등 지급
-            if (matchCount == 1) {}
-            if (matchCount == 2) {}
-            if (matchCount == 3) {}
-            if (matchCount == 4) {}
-            // <---------------------------------->
-        }
-        // people 초기화.
-        peopleCount = 0;
-    }
-
     ///////////////////////////////////////////////////////////////////////////
 
     // 티켓 관련
@@ -72,10 +46,7 @@ contract Lottery {
     uint64 ticketMax = 1000; // 최대 구입 가능
     uint256 public lotteryId;
 
-    constructor() {
-        manager = msg.sender;
-        lotteryId = 0;
-    }
+    constructor() {}
 
     // buyTickets 으로만 살 수 있어야 하니까
     fallback() external payable {
@@ -102,7 +73,7 @@ contract Lottery {
     /** ------------ Functions ------------ **/
 
     function enter() public payable enoughMoney {
-        players.push(payable(msg.sender));
+        // players.push(payable(msg.sender));
     }
 
     function random() private view returns (uint256) {
@@ -116,19 +87,79 @@ contract Lottery {
 
     // 한번에 최대 20장은 살 수 있음
     function buyTickets() public payable returns (bool) {
-        // require() ...
-        address buyer = msg.sender;
-        ticketsBought++;
+        // 참여자는  매개변수에 8자리 번호를 넘긴다.
+
+        contractBalance += msg.value;
+
+        uint256 selectNum;
+        people[peopleCount++] = Person(selectNum, payable(msg.sender));
+        return true;
     }
 
-    function pickWinner() public restricted {
-        uint256 randomIndex = random() % players.length;
-        players[randomIndex].transfer(address(this).balance);
-        lastWinner = players[randomIndex];
-        lotteryId++;
+    // 당첨자 임시 list
+    mapping(uint256 => Person) winners;
+    uint256 winnerCount;
 
-        // players 초기화
-        players = new address payable[](0);
+    function pickWinner() public restricted {
+        for (uint256 i = 0; i < peopleCount; i++) {
+            uint256 matchCount = 0;
+            uint256 selectNumber = people[i].selectNumber;
+            address payable pAddr = people[i].addr;
+
+            for (uint256 j = 0; j < 4; j++) {
+                if (randomNumbers[j] == selectNumber % 100) matchCount++;
+                selectNumber /= 100;
+            }
+
+            // match count에 따라서 차등 지급
+            winners[winnerCount++] = Person(0, pAddr, matchCount);
+        }
+        // match count 에 따라 차등 지급
+        transferToWinner();
+
+        // reset lotto
+        resetLottery();
+
+        // people 초기화.
+        peopleCount = 0;
+    }
+
+    function transferToWinner() public {
+        // 4개 맞춘 사람: 40%
+        // 3개 맞춘 사람: 30%
+        // 2개 맞춘 사람: 20%
+        // 1개 맞춘 사람: 10%
+        uint256 _4 = contractBalance * 0.4;
+        uint256 _3 = contractBalance * 0.3;
+        uint256 _2 = contractBalance * 0.2;
+        uint256 _1 = contractBalance * 0.1;
+
+        for (uint256 i = 0; i < winnerCount; i++) {
+            address payable pAddr = winners[i].addr;
+            uint256 m = winners[i].matchCount;
+            if (m == 1) {
+                transfer(pAddr, _1);
+            }
+            if (m == 2) {
+                transfer(pAddr, _2);
+            }
+            if (m == 3) {
+                transfer(pAddr, _3);
+            }
+            if (m == 4) {
+                transfer(pAddr, _4);
+            }
+        }
+    }
+
+    function transfer(address payable _to, uint256 _amount) public {
+        // Note that "to" is declared as payable
+        (bool success, ) = _to.call{value: _amount}("");
+        require(success, "Failed to send Ether");
+    }
+
+    function resetLottery() public returns (bool success) {
+        return true;
     }
 
     /** ------------ Getter ------------ **/
@@ -138,6 +169,7 @@ contract Lottery {
     }
 
     function getPlayers() public view returns (address payable[] memory) {
-        return players;
+        // return players;
+        return true;
     }
 }
