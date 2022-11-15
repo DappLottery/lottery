@@ -294,11 +294,11 @@ contract Lottery {
         return contractBalance*75/100;
     }
 
-    function getExpected_2st() public view returns (uint256) {
+    function getExpected_2nd() public view returns (uint256) {
         return contractBalance*125/1000;
     }
 
-    function getExpected_3st() public view returns (uint256) {
+    function getExpected_3rd() public view returns (uint256) {
         return contractBalance*125/1000;
     }
 
