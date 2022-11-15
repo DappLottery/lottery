@@ -6,25 +6,48 @@ pragma solidity >=0.6.0 <0.9.0;
  * @dev Lottery 스마트 컨트랙트
  */
 contract Lottery {
-    // ticket struct
-    struct Ticket {
-        uint256 _id;
-        uint256[6] _numbers;
+    struct PlayerList {
+        bool playersSwitch;
+        address payable[] players0;
+        address payable[] players1;
     }
 
-    // 플레이어 관련
     struct Player {
         address payable _address;
-        Ticket[] _tickets;
+        Ticket[] tickets;
+    }
+
+    struct Ticket {
+        uint256 _id; // 현재 복권에서 몇 번째 티켓
+        uint256[6] numbers;
+    }
+
+    struct LotteryNumber {
+        uint _lotteryId;
+        bool[46] flag;
+        uint256[6] winningNumber;
+    }
+
+    struct LotteryInfo {
+        uint256 lotteryId; // 몇 번째 복권
+        uint256 lotteryStart;
+        uint256 lotteryDuration;
+        bool lotteryEnded;
+        uint256 contractBalance; // SC 잔고
+    }
+
+    struct WinningPlayer {
+        uint _lotteryId;
+        address payable[] firstPlayers;
+        address payable[] secondPlayers;
+        address payable[] thirdPlayers;
     }
 
     // manager info
     address public manager;
 
     // player info
-    bool public playersSwitch;
-    address payable[] public players0;
-    address payable[] public players1;
+    PlayerList public playerList;
     mapping (address => Player) public ticketHolders;
     mapping (address => uint256) player2winnings;
 
@@ -33,20 +56,11 @@ contract Lottery {
     uint256 ticketMax = 1000; // 최대 구입 가능
 
     // 복권 관련
-    uint256 public lotteryId; // 몇개의 티켓
-    uint256 public lotteryStart;
-    uint256 public lotteryDuration;
-    bool public lotteryEnded;
-    uint256 public contractBalance; // SC 잔고
-
-    // 복권 번호 관련
-    bool[46] public flag;
-    uint256[6] public winningNumber;
+    LotteryInfo public lotteryInfo;
+    LotteryNumber public lotteryNumber;
 
     // 당첨자 관련
-    address payable[] public firstPlayers;
-    address payable[] public secondPlayers;
-    address payable[] public thirdPlayers;
+    WinningPlayer public winningPlayer;
 
     // 이벤트
     event TicketsBought(address indexed _from, uint256 _quantity);
@@ -60,7 +74,7 @@ contract Lottery {
 
     // 다 팔림 modifier
     modifier allTicketsSold() {
-        require(ticketHolders[msg.sender]._tickets.length >= ticketMax);
+        require(ticketHolders[msg.sender].tickets.length >= ticketMax);
         _;
     }
 
@@ -79,13 +93,13 @@ contract Lottery {
 
     // 로또 진행 중?
     modifier lotteryOngoing() {
-        require(block.timestamp < lotteryStart + lotteryDuration);
+        require(block.timestamp < lotteryInfo.lotteryStart + lotteryInfo.lotteryDuration);
         _;
     }
 
     // 로또 끝?
     modifier lotteryFinished() {
-        require(block.timestamp > lotteryStart + lotteryDuration);
+        require(block.timestamp > lotteryInfo.lotteryStart + lotteryInfo.lotteryDuration);
         _;
     }
 
@@ -93,10 +107,10 @@ contract Lottery {
 
     constructor() {
         manager = msg.sender;
-        lotteryId = 0;
-        lotteryStart = block.timestamp;
-        lotteryDuration = 24 hours;
-        playersSwitch = true;
+        lotteryInfo.lotteryId = 0;
+        lotteryInfo.lotteryStart = block.timestamp;
+        lotteryInfo.lotteryDuration = 24 hours;
+        playerList.playersSwitch = true;
     }
 
     fallback() external payable {
@@ -104,10 +118,10 @@ contract Lottery {
     }
 
     function enter() public payable enoughMoney {
-        if (playersSwitch) {
-            players1.push(payable(msg.sender));
+        if (playerList.playersSwitch) {
+            playerList.players1.push(payable(msg.sender));
         } else {
-            players0.push(payable(msg.sender));
+            playerList.players0.push(payable(msg.sender));
         }
     }
 
@@ -115,19 +129,19 @@ contract Lottery {
     function buyTickets() public payable lotteryOngoing returns (bool success) {
         address payable buyer = payable(msg.sender);
 
-        if (playersSwitch) {
-            players1.push(buyer);
+        if (playerList.playersSwitch) {
+            playerList.players1.push(buyer);
         } else {
-            players0.push(buyer);
+            playerList.players0.push(buyer);
         }
-        contractBalance += msg.value;
+        lotteryInfo.contractBalance += msg.value;
 
         // uint256 selectNum;
 
         // people[peopleCount++] = Person(selectNum, 0, toAddr);
 
         // buyer.send(.1 ether);
-        emit TicketsBought(msg.sender, ticketHolders[msg.sender]._tickets.length);
+        emit TicketsBought(msg.sender, ticketHolders[msg.sender].tickets.length);
         return true;
     }
 
@@ -135,13 +149,13 @@ contract Lottery {
         return
             uint256(
                 keccak256(
-                    abi.encodePacked(block.difficulty, block.timestamp, (playersSwitch) ? players1 : players0)
+                    abi.encodePacked(block.difficulty, block.timestamp, (playerList.playersSwitch) ? playerList.players1 : playerList.players0)
                 )
             );
     }
 
     function resetFlag() public {
-        for (uint256 i = 1; i < 46; i++) flag[i] = false;
+        for (uint256 i = 1; i < 46; i++) lotteryNumber.flag[i] = false;
     }
 
     function lotteryForWinningNumber() public {
@@ -154,14 +168,14 @@ contract Lottery {
             for (;;) {
                 rn = (random() % 45) + 1;
 
-                if (flag[rn] == false) break;
+                if (lotteryNumber.flag[rn] == false) break;
             }
 
-            flag[rn] = true;
-            winningNumber[i] = rn;
+            lotteryNumber.flag[rn] = true;
+            lotteryNumber.winningNumber[i] = rn;
         }
 
-        winningNumber = lotterySort(winningNumber);
+        lotteryNumber.winningNumber = lotterySort(lotteryNumber.winningNumber);
     }
 
     function confiscateUnreceived(address payable[] memory _players) internal {
@@ -169,7 +183,7 @@ contract Lottery {
             uint256 remainWinnings = player2winnings[_players[i]];
 
             if (0 < remainWinnings) {
-                contractBalance += remainWinnings;
+                lotteryInfo.contractBalance += remainWinnings;
             }
 
             player2winnings[_players[i]] = 0;
@@ -180,26 +194,26 @@ contract Lottery {
         for (uint256 i = 0; i < _players.length; i++) {
             Player memory playerInfo = ticketHolders[_players[i]];
 
-            for (uint256 j = 0; j < playerInfo._tickets.length; j++) {
-                uint256[6] memory playerNumber = lotterySort(playerInfo._tickets[j]._numbers);
+            for (uint256 j = 0; j < playerInfo.tickets.length; j++) {
+                uint256[6] memory playerNumber = lotterySort(playerInfo.tickets[j].numbers);
                 int answerCnt = 0;
                 int winningIdx = 0;
 
                 for (int k = 0; k < 6; k++) {
-                    while (winningIdx < 6 && winningNumber[uint(winningIdx)] < playerNumber[uint(k)]) {
+                    while (winningIdx < 6 && lotteryNumber.winningNumber[uint(winningIdx)] < playerNumber[uint(k)]) {
                         winningIdx++;
                         continue;
                     }
                     if (winningIdx == 6) break;
-                    if (winningNumber[uint(winningIdx)] == playerNumber[uint(k)]) answerCnt++;
+                    if (lotteryNumber.winningNumber[uint(winningIdx)] == playerNumber[uint(k)]) answerCnt++;
                 }
 
                 if (answerCnt == 6) {
-                    firstPlayers.push(playerInfo._address);
+                    winningPlayer.firstPlayers.push(playerInfo._address);
                 } else if (answerCnt == 5) {
-                    secondPlayers.push(playerInfo._address);
+                    winningPlayer.secondPlayers.push(playerInfo._address);
                 } else if (answerCnt == 4) {
-                    thirdPlayers.push(playerInfo._address);
+                    winningPlayer.thirdPlayers.push(playerInfo._address);
                 }
             }
         }
@@ -210,22 +224,22 @@ contract Lottery {
         lotteryForWinningNumber();
 
         // 미수령 당첨금 압수 & 당첨자 확인
-        if (playersSwitch) {
-            confiscateUnreceived(players0);
-            players0 = new address payable[](0);
-            checkoutWinners(players1);
+        if (playerList.playersSwitch) {
+            confiscateUnreceived(playerList.players0);
+            playerList.players0 = new address payable[](0);
+            checkoutWinners(playerList.players1);
         } else {
-            confiscateUnreceived(players1);
-            players1 = new address payable[](0);
-            checkoutWinners(players0);
+            confiscateUnreceived(playerList.players1);
+            playerList.players1 = new address payable[](0);
+            checkoutWinners(playerList.players0);
         }
 
         // 당첨금 적축
 
         // 복권 초기화
-        contractBalance = 0;
+        lotteryInfo.contractBalance = 0;
         resetLottery();
-        playersSwitch = !playersSwitch;
+        playerList.playersSwitch = !playerList.playersSwitch;
     }
 
     function transferToWinner() public {
@@ -262,9 +276,9 @@ contract Lottery {
     }
 
     function resetLottery() public lotteryFinished returns (bool success) {
-        lotteryEnded = false;
-        lotteryStart = block.timestamp;
-        lotteryDuration = 24 hours;
+        lotteryInfo.lotteryEnded = false;
+        lotteryInfo.lotteryStart = block.timestamp;
+        lotteryInfo.lotteryDuration = 24 hours;
         emit ResetLottery();
         return true;
     }
@@ -283,23 +297,23 @@ contract Lottery {
     // }
 
     function getPlayers() public view returns (address payable[] memory) {
-        if (playersSwitch) {
-            return players1;
+        if (playerList.playersSwitch) {
+            return playerList.players1;
         } else {
-            return players0;
+            return playerList.players0;
         }
     }
 
     function getExpected_1st() public view returns (uint256) {
-        return contractBalance*75/100;
+        return lotteryInfo.contractBalance*75/100;
     }
 
     function getExpected_2nd() public view returns (uint256) {
-        return contractBalance*125/1000;
+        return lotteryInfo.contractBalance*125/1000;
     }
 
     function getExpected_3rd() public view returns (uint256) {
-        return contractBalance*125/1000;
+        return lotteryInfo.contractBalance*125/1000;
     }
 
     // player가 자신의 당첨 금액 확인
