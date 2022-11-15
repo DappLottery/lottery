@@ -1,0 +1,16 @@
+l = Lottery.deploy({"from": accounts[0]})
+
+print(dir(l))
+
+from random import randint
+
+for i in range(1, len(accounts)):
+     accounts[i].transfer("0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87", f"{randint(1, 10)} ether")
+
+print(l.getBalance())
+print(l.getPlayers())
+
+l.divideMoney()
+
+print(l.getFirstPlace())
+print(l.getFirstMoney())
