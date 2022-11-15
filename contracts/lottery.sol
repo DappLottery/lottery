@@ -36,8 +36,9 @@ contract Lottery {
         uint256 contractBalance; // SC 잔고
     }
 
-    struct WinningPlayer {
+    struct WinningInfo {
         uint _lotteryId;
+        uint256 realTotalMoney; // 75%의 잔고
         address payable[] firstPlayers;
         address payable[] secondPlayers;
         address payable[] thirdPlayers;
@@ -60,7 +61,7 @@ contract Lottery {
     LotteryNumber public lotteryNumber;
 
     // 당첨자 관련
-    WinningPlayer public winningPlayer;
+    WinningInfo public winningInfo;
 
     // 이벤트
     event TicketsBought(address indexed _from, uint256 _quantity);
@@ -101,6 +102,14 @@ contract Lottery {
     modifier lotteryFinished() {
         require(block.timestamp > lotteryInfo.lotteryStart + lotteryInfo.lotteryDuration);
         _;
+    }
+
+    modifier enoughLottery() {
+        if (lotteryInfo.contractBalance == 0) {
+            revert();
+        } else {
+            _;
+        }
     }
 
     /** ------------ Functions ------------ **/
@@ -209,14 +218,39 @@ contract Lottery {
                 }
 
                 if (answerCnt == 6) {
-                    winningPlayer.firstPlayers.push(playerInfo._address);
+                    winningInfo.firstPlayers.push(playerInfo._address);
                 } else if (answerCnt == 5) {
-                    winningPlayer.secondPlayers.push(playerInfo._address);
+                    winningInfo.secondPlayers.push(playerInfo._address);
                 } else if (answerCnt == 4) {
-                    winningPlayer.thirdPlayers.push(playerInfo._address);
+                    winningInfo.thirdPlayers.push(playerInfo._address);
                 }
             }
         }
+    }
+
+    function divideMoney() public enoughLottery {
+        winningInfo.realTotalMoney = lotteryInfo.contractBalance / 100 * 75; // 75%, fixed point도 없음;
+        uint totalWinnings = winningInfo.realTotalMoney;
+
+        uint firstMoneyToSend = totalWinnings / 100 * 70;
+        firstMoneyToSend /= winningInfo.firstPlayers.length;
+        for (uint i = 0; i < winningInfo.firstPlayers.length; i++) {
+            player2winnings[winningInfo.firstPlayers[i]] += firstMoneyToSend;
+        }
+
+        uint secondMoneyToSend = totalWinnings / 100 * 15;
+        secondMoneyToSend /= winningInfo.secondPlayers.length;
+        for (uint i = 0; i < winningInfo.secondPlayers.length; i++) {
+            player2winnings[winningInfo.secondPlayers[i]] += secondMoneyToSend;
+        }
+
+        uint thirdMoneyToSend = totalWinnings / 100 * 15;
+        thirdMoneyToSend /= winningInfo.thirdPlayers.length;
+        for (uint i = 0; i < winningInfo.thirdPlayers.length; i++) {
+            player2winnings[winningInfo.thirdPlayers[i]] += thirdMoneyToSend;
+        }
+
+        lotteryInfo.contractBalance -= totalWinnings;
     }
 
     function pickWinner() public restricted {
@@ -234,7 +268,8 @@ contract Lottery {
             checkoutWinners(playerList.players0);
         }
 
-        // 당첨금 적축
+        // 당첨금 배부
+        divideMoney();
 
         // 복권 초기화
         lotteryInfo.contractBalance = 0;
@@ -305,15 +340,15 @@ contract Lottery {
     }
 
     function getExpected_1st() public view returns (uint256) {
-        return lotteryInfo.contractBalance*75/100;
+        return lotteryInfo.contractBalance / 100 * 75 * 70 / 100;
     }
 
     function getExpected_2nd() public view returns (uint256) {
-        return lotteryInfo.contractBalance*125/1000;
+        return lotteryInfo.contractBalance / 100 * 75 * 15 / 100;
     }
 
     function getExpected_3rd() public view returns (uint256) {
-        return lotteryInfo.contractBalance*125/1000;
+        return lotteryInfo.contractBalance / 100 * 75 * 15 / 100;
     }
 
     // player가 자신의 당첨 금액 확인
