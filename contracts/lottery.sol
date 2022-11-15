@@ -290,8 +290,21 @@ contract Lottery {
         }
     }
 
-    function getBalance() public view returns (uint256) {
-        return address(this).balance;
+    function getExpected_1st() public view returns (uint256) {
+        return contractBalance*75/100;
+    }
+
+    function getExpected_2st() public view returns (uint256) {
+        return contractBalance*125/1000;
+    }
+
+    function getExpected_3st() public view returns (uint256) {
+        return contractBalance*125/1000;
+    }
+
+    // player가 자신의 당첨 금액 확인
+    function getMyWinnings() external view returns (uint256) {
+        return player2winnings[msg.sender];
     }
 
     /** ------------ Sort ------------ **/
