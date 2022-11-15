@@ -85,7 +85,7 @@ contract Lottery {
     }
 
     modifier enoughLottery() {
-        if (contractBalance == 0 || realTotalMoney == 0) {
+        if (contractBalance == 0) {
             revert();
         } else {
             _;
