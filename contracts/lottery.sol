@@ -294,7 +294,7 @@ contract Lottery {
         return address(this).balance;
     }
 
-    /** ------------ Getter ------------ **/
+    /** ------------ Sort ------------ **/
 
     function quickSort(uint[6] memory arr, int left, int right) internal pure {
         int i = left;
