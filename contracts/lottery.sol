@@ -1,30 +1,23 @@
 pragma solidity >=0.7.0 <0.9.0;
 
-/**
- * @title Lottery
- * @dev Lottery 스마트 컨트랙트
- */
 contract Lottery {
     // 플레이어 관련
     address public manager;
     address public lastWinner;
-    // address payable[] public players;
+    address payable[] public players;
 
     uint256 public contractBalance;
 
-    /////////////////////////////////////////////////////
-    // my code: 당첨자를 뽑는 코드
     mapping(uint256 => uint256) randomNumbers;
-
-    uint256 peopleCount;
 
     struct Person {
         uint256 selectNumber;
-        address payable addr;
         uint256 matchCount;
+        address payable addr;
     }
 
     mapping(uint256 => Person) people;
+    uint256 peopleCount;
 
     function setRandomNumber() public {
         // 랜덤 넘버: 4개, 2자리
@@ -38,8 +31,6 @@ contract Lottery {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-
     // 티켓 관련
     uint256 public ticketsBought = 0; // 현재 유저가 몇개 샀는지
     uint256 ticketPrice = .0001 ether; // 가격
@@ -47,11 +38,6 @@ contract Lottery {
     uint256 public lotteryId;
 
     constructor() {}
-
-    // buyTickets 으로만 살 수 있어야 하니까
-    fallback() external payable {
-        buyTickets();
-    }
 
     // 다 팔림 modifier
     modifier allTicketsSold() {
@@ -92,7 +78,11 @@ contract Lottery {
         contractBalance += msg.value;
 
         uint256 selectNum;
-        people[peopleCount++] = Person(selectNum, payable(msg.sender));
+
+        address payable toAddr = payable(msg.sender);
+
+        people[peopleCount++] = Person(selectNum, 0, toAddr);
+
         return true;
     }
 
@@ -112,7 +102,7 @@ contract Lottery {
             }
 
             // match count에 따라서 차등 지급
-            winners[winnerCount++] = Person(0, pAddr, matchCount);
+            winners[winnerCount++] = Person(0, matchCount, pAddr);
         }
         // match count 에 따라 차등 지급
         transferToWinner();
@@ -129,14 +119,15 @@ contract Lottery {
         // 3개 맞춘 사람: 30%
         // 2개 맞춘 사람: 20%
         // 1개 맞춘 사람: 10%
-        uint256 _4 = contractBalance * 0.4;
-        uint256 _3 = contractBalance * 0.3;
-        uint256 _2 = contractBalance * 0.2;
-        uint256 _1 = contractBalance * 0.1;
+        uint256 _1 = (contractBalance / 10);
+        uint256 _2 = ((2 * contractBalance) / 10);
+        uint256 _3 = ((3 * contractBalance) / 10);
+        uint256 _4 = ((4 * contractBalance) / 10);
 
         for (uint256 i = 0; i < winnerCount; i++) {
             address payable pAddr = winners[i].addr;
             uint256 m = winners[i].matchCount;
+
             if (m == 1) {
                 transfer(pAddr, _1);
             }
@@ -153,9 +144,7 @@ contract Lottery {
     }
 
     function transfer(address payable _to, uint256 _amount) public {
-        // Note that "to" is declared as payable
-        (bool success, ) = _to.call{value: _amount}("");
-        require(success, "Failed to send Ether");
+        _to.transfer(_amount);
     }
 
     function resetLottery() public returns (bool success) {
@@ -169,7 +158,6 @@ contract Lottery {
     }
 
     function getPlayers() public view returns (address payable[] memory) {
-        // return players;
-        return true;
+        // return playe0
     }
 }
