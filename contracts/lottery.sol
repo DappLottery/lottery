@@ -122,7 +122,7 @@ contract Lottery {
         playerList.playersSwitch = true;
     }
 
-    fallback() external payable {
+    receive() external payable {
         buyTickets();
     }
 
@@ -137,19 +137,20 @@ contract Lottery {
     // 한번에 최대 20장은 살 수 있음
     function buyTickets() public payable lotteryOngoing returns (bool success) {
         address payable buyer = payable(msg.sender);
+        
+        // uint256[] selectNum;
 
         if (playerList.playersSwitch) {
+            // playerList.players1[...] = Ticket(...);
             playerList.players1.push(buyer);
         } else {
+            // playerList.players0[...] = Ticket(...);
             playerList.players0.push(buyer);
         }
         lotteryInfo.contractBalance += msg.value;
 
-        // uint256 selectNum;
+        // buyer.send(ticketPrice);
 
-        // people[peopleCount++] = Person(selectNum, 0, toAddr);
-
-        // buyer.send(.1 ether);
         emit TicketsBought(msg.sender, ticketHolders[msg.sender].tickets.length);
         return true;
     }
