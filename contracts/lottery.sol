@@ -1,66 +1,68 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.9.0;
+pragma solidity ^0.8.0;
 
 /**
  * @title Lottery
  * @dev Lottery 스마트 컨트랙트
  */
 contract Lottery {
-    // ticket struct
+    // 티켓 관련
+    struct Ticket {
+        uint256 id;
+        uint8[6] number;
+    }
 
     // 플레이어 관련
     struct Player {
-        address payable _address;
-        uint256 matchCount;
-        uint256 _tickets;
+        address payable addr;
+        Ticket[] firstTickets;
+        Ticket[] secondTickets;
+        Ticket[] thirdTickets;
     }
 
-    address public manager;
-    address public lastWinner;
+    // Lottery 관련
+    address public owner;
+    uint256 lotteryId = 0; // 게임 복권 갯수
+    uint256 contractBalance = 0;
+    uint256 private nextGameBalance = 0;
 
-    address payable[] public players;
-    mapping(address => Player) public ticketHolders;
+    uint256 private ticketMax = 30;
+    uint256 private ticketPrice = .15 ether;
+    uint256 private cutRate = 75; // 75%, float 없음
 
-    // 티켓 관련
-    uint256 public ticketsBought = 0; // 현재 유저가 몇개 샀는지
-    uint256 ticketPrice = .01 ether; // 가격
-    uint256 private ticketMax = 1000; // 최대 구입 가능
-    uint256 public lotteryId; // 몇개의 티켓
-    uint256 public lotteryStart;
-    uint256 public lotteryDuration;
-    bool public lotteryEnded;
-    uint256 public contractBalance = 0; // SC 잔고
+    uint8[] private luckyNumber = [1, 2, 3, 3, 5, 6]; // private이 그 private 아님
 
-    // SEOK 당첨 관련
-    uint256 public realTotalMoney = 0; // 75%의 잔고
+    // mapping(address => Player) public players;
+    Player[] public players; // 모든 플레이어 돌 때 용
+    // mapping(address => FirstTicket[]) firstTicketMap;
+    mapping(address => Ticket[]) public ticketMap; // 플레이어 찾을 때 (gas fee 위해)
+    mapping(address => bool) public playerChecks; // solidity mapping existence 개념 없음
 
-    uint256 public firstRanks;
-    uint256 public secondRanks;
-    uint256 public thirdRanks;
-
-    uint256 public lastFirstMoney;
-    uint256 public lastSecondMoney;
-    uint256 public lastThirdMoney;
-    // SEOK 당첨 관련
+    uint256 actualPrice = 0;
+    uint256 eventMoney = 0;
+    uint256 firstWinner = 0;
+    uint256 secondWinner = 0;
+    uint256 thirdWinner = 0;
+    uint256 firstMoney = 0;
+    uint256 secondMoney = 0;
+    uint256 thirdMoney = 0;
+    uint256 nonce = 1;
+    //
 
     // 이벤트
-    event TicketsBought(address indexed _from, uint256 _quantity);
+    event TicketsBought(address indexed _from);
     event ResetLottery();
-
-    // receive() external payable {
-    //     buyTickets();
-    // }
 
     // Modifiers
 
     // 다 팔림 modifier
-    modifier allTicketsSold() {
-        require(ticketsBought >= ticketMax);
-        _;
-    }
+    // modifier allTicketsSold() {
+    //     require(ticketsBought >= ticketMax);
+    //     _;
+    // }
 
     modifier restricted() {
-        require(msg.sender == manager);
+        require(msg.sender == owner);
         _;
     }
 
@@ -73,19 +75,19 @@ contract Lottery {
     }
 
     // 로또 진행 중?
-    modifier lotteryOngoing() {
-        require(block.timestamp < lotteryStart + lotteryDuration);
-        _;
-    }
+    // modifier lotteryOngoing() {
+    //     require(block.timestamp < lotteryStart + lotteryDuration);
+    //     _;
+    // }
 
-    // 로또 끝?
-    modifier lotteryFinished() {
-        require(block.timestamp > lotteryStart + lotteryDuration);
-        _;
-    }
+    // // 로또 끝?
+    // modifier lotteryFinished() {
+    //     require(block.timestamp > lotteryStart + lotteryDuration);
+    //     _;
+    // }
 
     modifier enoughLottery() {
-        if (contractBalance == 0) {
+        if (contractBalance == 0 || lotteryId == 0) {
             revert();
         } else {
             _;
@@ -94,191 +96,178 @@ contract Lottery {
 
     /** ------------ Functions ------------ **/
 
-    constructor() public {
-        manager = msg.sender;
+    constructor() {
+        owner = msg.sender;
         lotteryId = 0;
-        lotteryStart = block.timestamp;
-        lotteryDuration = 24 hours;
     }
 
-    fallback() external payable {
-        buyTickets();
-    }
+    // 주소로 바로 돈 보낼 때
+    // fallback() external payable {
+    //     buyTickets();
+    // }
 
-    function enter() public payable enoughMoney {
-        players.push(payable(msg.sender));
-    }
-
-    function random() private view returns (uint256) {
-        return
-            uint256(
-                keccak256(
-                    abi.encodePacked(block.difficulty, block.timestamp, players)
+    function random(uint256 dom) private returns (uint256) {
+        uint256 rand = (uint256(
+            keccak256(
+                abi.encodePacked(
+                    block.difficulty,
+                    block.timestamp,
+                    nonce,
+                    msg.sender
                 )
-            );
+            )
+        ) % dom) + 1;
+        nonce++;
+        return rand; // 1 ~ dom
     }
 
-    function setRandomNumber() public {
-        // 랜덤 넘버: 4개, 2자리
-        // uint256 randomNumber = random();
-        // // 11 22 33 44
-        // randomNumber = randomNumber % 100000000;
-        // for (uint256 i = 0; i < 4; i++) {
-        //     randomNumbers[i] = randomNumber % 100;
-        //     randomNumber /= 100;
-        // }
-    }
+    // function enter() public payable enoughMoney {
+    //     if (playerChecks[msg.sender] == false) {
+    //         players.push(Player(payable(msg.sender), [], []));
+    //         playerChecks[msg.sender] = true;
+    //     } else {
+    //         revert(); // 이미 존재
+    //     }
+    // }
 
+    // 일반적 절차: BUY - PICK - SEND
     // 한번에 최대 20장은 살 수 있음
-    function buyTickets() public payable lotteryOngoing returns (bool success) {
-        // players에 있는지 loop 할 것
+    // dApp에서 넘버 생성 누르면 번호 뜨고 그 옆에 몇 장 살껀지도
+    // lotteryOngoing
+    function buyTickets() public payable returns (bool success) {
+        // if (msg.value < amount * ticketPrice) {
+        //     return false; // 또는 돈 만큼 티켓 사주기
+        // }
 
-        address payable buyer = payable(msg.sender);
+        if (playerChecks[msg.sender] == false) {
+            // uint256 id = players.length;
+            Player storage p = players.push(); // solidity 언어가 너무 이상, 일단 empty space 추가
+            p.addr = payable(msg.sender);
+            // p.firstTickets.push();
+            playerChecks[msg.sender] = true;
+        }
 
-        ticketsBought += ticketHolders[msg.sender]._tickets;
+        uint8[6] memory number = [
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7))
+        ];
+        ticketMap[msg.sender].push(Ticket(random(9999), number));
 
-        players.push(buyer);
         contractBalance += msg.value;
-
-        uint256 selectNum;
-
-        emit TicketsBought(msg.sender, ticketHolders[msg.sender]._tickets);
+        lotteryId++; // dApp 에서 로또 총 몇개 팔렸는지 쉽게
+        emit TicketsBought(msg.sender);
         return true;
     }
 
-    // SEOK 당첨 관련
-    function divideMoney() public enoughLottery {
-        realTotalMoney = contractBalance / 100 * 75; // 75%, fixed point도 없음;
+    function pickWinner() public enoughLottery restricted {
+        // 플레이어 없음
+        if (lotteryId == 0) {
+            revert();
+        }
 
-        uint firstMoneyToSend = realTotalMoney / 100 * 70;
-        lastFirstMoney = firstMoneyToSend/(firstRanks);
+        for (uint256 i = 0; i < players.length; i++) {
+            Player storage player = players[i];
+            if (ticketMap[player.addr].length == 0) continue;
 
-        uint secondMoneyToSend = realTotalMoney / 100 * 15;
-        lastSecondMoney = realTotalMoney/(secondRanks);
+            for (uint256 j = 0; j < ticketMap[player.addr].length; j++) {
+                Ticket memory ticket = ticketMap[player.addr][j];
+                uint8 counts = 0;
 
-        uint thirdMoneyToSend = realTotalMoney / 100 * 15;
-        lastThirdMoney = realTotalMoney/(thirdRanks);
+                for (uint8 t = 0; t < 6; t++) {
+                    if (luckyNumber[t] == ticket.number[t]) counts++;
+                }
 
-        contractBalance -= realTotalMoney;
-        
-        // players 들 loop 해서
-        // nMoneyToSend 씩 주면 됨
-        // ex) 1등 loop -> firstMoneyToSend 씩 주면 firstRanks 만큼의 돈이 나감
-
-        // realTotalMoney 보여주기 위해 초기화 안함
+                if (counts == 6) {
+                    firstWinner++;
+                    player.firstTickets.push(ticket);
+                } else if (counts >= 4) {
+                    // 차피 6은 포함 안된 if
+                    secondWinner++;
+                    player.secondTickets.push(ticket);
+                } else if (counts >= 2) {
+                    thirdWinner++;
+                    player.thirdTickets.push(ticket);
+                }
+            }
+        }
     }
-    // SEOK 당첨 관련
 
-    function pickWinner() public restricted {
-        // TODO 어떻게 뽑을지
-        uint256 randomIndex = random() % players.length;
+    function sendMoney() private restricted enoughLottery {
+        actualPrice = (contractBalance / 100) * cutRate; // 75%, fixed point도 없음;
 
-        // players[randomIndex].transfer(address(this).balance);
-        lastWinner = players[randomIndex];
+        if (firstWinner == 0) {
+            nextGameBalance += (actualPrice / 100) * 70;
+        } else {
+            firstMoney = ((actualPrice / 100) * 70) / firstWinner;
+        }
 
+        if (secondWinner == 0) {
+            nextGameBalance += (actualPrice / 100) * 15;
+        } else {
+            secondMoney = ((actualPrice / 100) * 15) / secondWinner;
+        }
 
-        // contractBalance = 0;
+        if (thirdWinner == 0) {
+            nextGameBalance += (actualPrice / 100) * 15;
+        } else {
+            thirdMoney = ((actualPrice / 100) * 15) / thirdWinner;
+        }
+
+        for (uint256 i = 0; i < players.length; i++) {
+            Player storage player = players[i];
+            eventMoney += player.firstTickets.length * firstMoney;
+            player.addr.transfer(player.firstTickets.length * firstMoney);
+
+            eventMoney += player.secondTickets.length * secondMoney;
+            player.addr.transfer(player.secondTickets.length * secondMoney);
+
+            eventMoney += player.thirdTickets.length * thirdMoney;
+            player.addr.transfer(player.thirdTickets.length * thirdMoney);
+        }
+
         resetLottery();
-        // players 초기화
-        players = new address payable[](0);
-
-        // for (uint256 i = 0; i < peopleCount; i++) {
-        //     uint256 matchCount = 0;
-        //     uint256 selectNumber = people[i].selectNumber;
-        //     address payable pAddr = people[i].addr;
-
-        //     for (uint256 j = 0; j < 4; j++) {
-        //         if (randomNumbers[j] == selectNumber % 100) matchCount++;
-        //         selectNumber /= 100;
-        //     }
-
-        //     // match count에 따라서 차등 지급
-        //     winners[winnerCount++] = Person(0, matchCount, pAddr);
-        // }
-        // // match count 에 따라 차등 지급
-        // transferToWinner();
-
-        // // reset lotto
-        // resetLottery();
-
-        // // people 초기화.
-        // peopleCount = 0;
     }
 
-    function transferToWinner() public {
-        // 4개 맞춘 사람: 40%
-        // 3개 맞춘 사람: 30%
-        // 2개 맞춘 사람: 20%
-        // 1개 맞춘 사람: 10%
-        // uint256 _1 = (contractBalance / 10);
-        // uint256 _2 = ((2 * contractBalance) / 10);
-        // uint256 _3 = ((3 * contractBalance) / 10);
-        // uint256 _4 = ((4 * contractBalance) / 10);
-        // for (uint256 i = 0; i < winnerCount; i++) {
-        //     address payable pAddr = winners[i].addr;
-        //     uint256 m = winners[i].matchCount;
-        //     if (m == 1) {
-        //         transfer(pAddr, _1);
-        //     }
-        //     if (m == 2) {
-        //         transfer(pAddr, _2);
-        //     }
-        //     if (m == 3) {
-        //         transfer(pAddr, _3);
-        //     }
-        //     if (m == 4) {
-        //         transfer(pAddr, _4);
-        //     }
-        // }
-    }
-
-    function transfer(address payable _to, uint256 _amount) public {
-        _to.transfer(_amount);
-    }
-
-    function resetLottery() public lotteryFinished returns (bool success) {
-        lotteryEnded = false;
-        lotteryStart = block.timestamp;
-        lotteryDuration = 24 hours;
+    // lotteryFinished
+    function resetLottery() public returns (bool success) {
+        // lotteryEnded = false;
+        // lotteryStart = block.timestamp;
+        // lotteryDuration = 24 hours;
         emit ResetLottery();
         return true;
     }
 
     /** ------------ Getter ------------ **/
 
-    function getWinner() public view returns (address) {
-        return lastWinner;
-    }
+    // function getWinner() public view returns (address) {
+    //     return lastWinner;
+    // }
 
-    function getPlayers() public view returns (address payable[] memory) {
+    function getPlayers() public view returns (Player[] memory) {
         return players;
     }
 
-    function getBalance() public view returns (uint256) {
-        return address(this).balance;
-    }
-
-    function getFirstPlace() public view returns (uint256) {
-        return firstRanks;
-    }
-
-    function getSecondPlace() public view returns (uint256) {
-        return secondRanks;
-    }
-
-    function getThirdPlace() public view returns (uint256) {
-        return thirdRanks;
+    function getWinMoney() public view returns (uint256) {
+        return contractBalance;
     }
 
     function getFirstMoney() public view returns (uint256) {
-        return lastFirstMoney;
+        return firstMoney;
     }
 
     function getSecondMoney() public view returns (uint256) {
-        return lastSecondMoney;
+        return secondMoney;
     }
 
     function getThirdMoney() public view returns (uint256) {
-        return lastThirdMoney;
+        return thirdMoney;
+    }
+
+    function getTicketPrice() public view returns (uint256) {
+        return ticketPrice;
     }
 }
