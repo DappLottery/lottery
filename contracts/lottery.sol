@@ -22,11 +22,17 @@ contract Lottery {
 
     // Lottery 관련
     address public owner;
-    uint256 lotteryId = 0; // 게임 복권 갯수
-    uint256 contractBalance = 0;
+    uint256 private lotteryId = 0; // 게임 복권 갯수
+    uint256 private contractBalance = 0;
     uint256 private nextGameBalance = 0;
 
-    uint256 private ticketMax = 30;
+    // 게임 시간
+    uint256 public lotteryStart;
+    uint256 public lotteryDuration;
+    uint256 public lotteryEnd;
+    bool public lotteryEnded;
+
+    uint256 private ticketMax = 20;
     uint256 private ticketPrice = .15 ether;
     uint256 private cutRate = 75; // 75%, float 없음
 
@@ -38,6 +44,7 @@ contract Lottery {
     mapping(address => Ticket[]) public ticketMap; // 플레이어 찾을 때 (gas fee 위해)
     mapping(address => bool) public playerChecks; // solidity mapping existence 개념 없음
 
+    // TEMPS
     uint256 actualPrice = 0;
     uint256 eventMoney = 0;
     uint256 firstWinner = 0;
@@ -53,13 +60,17 @@ contract Lottery {
     event TicketsBought(address indexed _from);
     event ResetLottery();
 
+    error TooEarly(uint256 time);
+    error TooLate(uint256 time);
+
     // Modifiers
 
-    // 다 팔림 modifier
-    // modifier allTicketsSold() {
-    //     require(ticketsBought >= ticketMax);
-    //     _;
-    // }
+    // 20장 삼 modifier
+    modifier enoughTicket() {
+        if (ticketMap[msg.sender].length > ticketMax)
+            revert("Too many tickets");
+        _;
+    }
 
     modifier restricted() {
         require(msg.sender == owner);
@@ -68,27 +79,25 @@ contract Lottery {
 
     modifier enoughMoney() {
         if (msg.value < ticketPrice) {
-            revert();
+            revert("Not enough money");
         } else {
             _;
         }
     }
 
-    // 로또 진행 중?
-    // modifier lotteryOngoing() {
-    //     require(block.timestamp < lotteryStart + lotteryDuration);
-    //     _;
-    // }
+    modifier onlyBefore(uint256 time) {
+        if (block.timestamp >= time) revert TooLate(time);
+        _;
+    }
 
-    // // 로또 끝?
-    // modifier lotteryFinished() {
-    //     require(block.timestamp > lotteryStart + lotteryDuration);
-    //     _;
-    // }
+    modifier onlyAfter(uint256 time) {
+        if (block.timestamp <= time) revert TooEarly(time);
+        _;
+    }
 
     modifier enoughLottery() {
         if (contractBalance == 0 || lotteryId == 0) {
-            revert();
+            revert("Not enough lottery");
         } else {
             _;
         }
@@ -99,6 +108,11 @@ contract Lottery {
     constructor() {
         owner = msg.sender;
         lotteryId = 0;
+
+        // Time
+        lotteryStart = block.timestamp;
+        lotteryDuration = 10 seconds;
+        lotteryEnd = lotteryStart + lotteryDuration;
     }
 
     // 주소로 바로 돈 보낼 때
@@ -106,6 +120,7 @@ contract Lottery {
     //     buyTickets();
     // }
 
+    // TODO: ChainLink VRF 써서 unpredictable random number generate 하기
     function random(uint256 dom) private returns (uint256) {
         uint256 rand = (uint256(
             keccak256(
@@ -134,7 +149,13 @@ contract Lottery {
     // 한번에 최대 20장은 살 수 있음
     // dApp에서 넘버 생성 누르면 번호 뜨고 그 옆에 몇 장 살껀지도
     // lotteryOngoing
-    function buyTickets() public payable returns (bool success) {
+    function buyTicket()
+        public
+        payable
+        enoughTicket
+        onlyBefore(lotteryEnd)
+        returns (bool success)
+    {
         // if (msg.value < amount * ticketPrice) {
         //     return false; // 또는 돈 만큼 티켓 사주기
         // }
@@ -163,10 +184,15 @@ contract Lottery {
         return true;
     }
 
-    function pickWinner() public enoughLottery restricted {
+    function pickWinner()
+        public
+        onlyAfter(lotteryEnd)
+        enoughLottery
+        restricted
+    {
         // 플레이어 없음
         if (lotteryId == 0) {
-            revert();
+            revert("No player");
         }
 
         for (uint256 i = 0; i < players.length; i++) {
@@ -194,6 +220,8 @@ contract Lottery {
                 }
             }
         }
+
+        sendMoney();
     }
 
     function sendMoney() private restricted enoughLottery {
@@ -233,10 +261,15 @@ contract Lottery {
     }
 
     // lotteryFinished
-    function resetLottery() public returns (bool success) {
-        // lotteryEnded = false;
-        // lotteryStart = block.timestamp;
-        // lotteryDuration = 24 hours;
+    function resetLottery()
+        public
+        onlyAfter(lotteryEnd)
+        returns (bool success)
+    {
+        lotteryEnded = true;
+        lotteryStart = block.timestamp;
+        lotteryDuration = 10 seconds;
+        lotteryEnd = lotteryStart + lotteryDuration;
         emit ResetLottery();
         return true;
     }
