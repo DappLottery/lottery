@@ -36,7 +36,7 @@ contract Lottery {
     uint256 private ticketPrice = .15 ether;
     uint256 private cutRate = 75; // 75%, float 없음
 
-    uint8[] private luckyNumber = [1, 2, 3, 3, 5, 6]; // private이 그 private 아님
+    uint8[] private luckyNumber; // private이 그 private 아님
 
     // mapping(address => Player) public players;
     Player[] public players; // 모든 플레이어 돌 때 용
@@ -109,6 +109,15 @@ contract Lottery {
         owner = msg.sender;
         lotteryId = 0;
 
+        luckyNumber = [
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7))
+        ];
+
         // Time
         lotteryStart = block.timestamp;
         lotteryDuration = 10 seconds;
@@ -127,7 +136,7 @@ contract Lottery {
                 abi.encodePacked(
                     block.difficulty,
                     block.timestamp,
-                    nonce,
+                    keccak256(abi.encodePacked(nonce)),
                     msg.sender
                 )
             )
@@ -266,6 +275,15 @@ contract Lottery {
         onlyAfter(lotteryEnd)
         returns (bool success)
     {
+        luckyNumber = [
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7))
+        ];
+
         lotteryEnded = true;
         lotteryStart = block.timestamp;
         lotteryDuration = 10 seconds;
@@ -282,6 +300,14 @@ contract Lottery {
 
     function getPlayers() public view returns (Player[] memory) {
         return players;
+    }
+
+    function getTickets(address sender) public view returns (Ticket[] memory) {
+        return ticketMap[sender];
+    }
+
+    function getLuckyNumber() public view returns (uint8[] memory) {
+        return luckyNumber;
     }
 
     function getWinMoney() public view returns (uint256) {
@@ -302,5 +328,9 @@ contract Lottery {
 
     function getTicketPrice() public view returns (uint256) {
         return ticketPrice;
+    }
+
+    function getNextMoney() public view returns (uint256) {
+        return nextGameBalance;
     }
 }
