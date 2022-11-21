@@ -8,7 +8,7 @@ pragma solidity ^0.8.0;
 contract Lottery {
     // 티켓 관련
     struct Ticket {
-        uint256 id;
+        bytes32 id;
         uint8[6] number;
     }
 
@@ -30,7 +30,6 @@ contract Lottery {
     uint256 public lotteryStart;
     uint256 public lotteryDuration;
     uint256 public lotteryEnd;
-    bool public lotteryEnded;
 
     uint256 private ticketMax = 20;
     uint256 private ticketPrice = .15 ether;
@@ -40,6 +39,11 @@ contract Lottery {
 
     // mapping(address => Player) public players;
     Player[] public players; // 모든 플레이어 돌 때 용
+
+    address[] public firstWinners; // 역대 당첨자들
+    address[] public secondWinners; // 역대 당첨자들
+    address[] public thirdWinners; // 역대 당첨자들
+
     // mapping(address => FirstTicket[]) firstTicketMap;
     mapping(address => Ticket[]) public ticketMap; // 플레이어 찾을 때 (gas fee 위해)
     mapping(address => bool) public playerChecks; // solidity mapping existence 개념 없음
@@ -115,10 +119,9 @@ contract Lottery {
         lotteryEnd = lotteryStart + lotteryDuration;
     }
 
-    // 주소로 바로 돈 보낼 때
-    // fallback() external payable {
-    //     buyTickets();
-    // }
+    fallback() external payable {}
+
+    receive() external payable {}
 
     // TODO: ChainLink VRF 써서 unpredictable random number generate 하기
     function random(uint256 dom) private returns (uint256) {
@@ -135,15 +138,6 @@ contract Lottery {
         nonce++;
         return rand; // 1 ~ dom
     }
-
-    // function enter() public payable enoughMoney {
-    //     if (playerChecks[msg.sender] == false) {
-    //         players.push(Player(payable(msg.sender), [], []));
-    //         playerChecks[msg.sender] = true;
-    //     } else {
-    //         revert(); // 이미 존재
-    //     }
-    // }
 
     // 일반적 절차: BUY - PICK - SEND
     // 한번에 최대 20장은 살 수 있음
@@ -164,7 +158,6 @@ contract Lottery {
             // uint256 id = players.length;
             Player storage p = players.push(); // solidity 언어가 너무 이상, 일단 empty space 추가
             p.addr = payable(msg.sender);
-            // p.firstTickets.push();
             playerChecks[msg.sender] = true;
         }
 
@@ -176,7 +169,10 @@ contract Lottery {
             uint8(random(7)),
             uint8(random(7))
         ];
-        ticketMap[msg.sender].push(Ticket(random(9999), number));
+
+        ticketMap[msg.sender].push(
+            Ticket(keccak256(abi.encodePacked(block.timestamp, nonce)), number)
+        );
 
         contractBalance += msg.value;
         lotteryId++; // dApp 에서 로또 총 몇개 팔렸는지 쉽게
@@ -194,7 +190,7 @@ contract Lottery {
         if (lotteryId == 0) {
             revert("No player");
         }
-        
+
         luckyNumber = [
             uint8(random(7)),
             uint8(random(7)),
@@ -219,13 +215,16 @@ contract Lottery {
                 if (counts == 6) {
                     firstWinner++;
                     player.firstTickets.push(ticket);
+                    firstWinners.push(player.addr);
                 } else if (counts >= 4) {
                     // 차피 6은 포함 안된 if
                     secondWinner++;
                     player.secondTickets.push(ticket);
+                    secondWinners.push(player.addr);
                 } else if (counts >= 2) {
                     thirdWinner++;
                     player.thirdTickets.push(ticket);
+                    thirdWinners.push(player.addr);
                 }
             }
         }
@@ -235,6 +234,7 @@ contract Lottery {
 
     function sendMoney() private restricted enoughLottery {
         actualPrice = (contractBalance / 100) * cutRate; // 75%, fixed point도 없음;
+        contractBalance -= actualPrice;
 
         if (firstWinner == 0) {
             nextGameBalance += (actualPrice / 100) * 70;
@@ -275,22 +275,32 @@ contract Lottery {
         onlyAfter(lotteryEnd)
         returns (bool success)
     {
-        lotteryEnded = true;
         lotteryStart = block.timestamp;
-        lotteryDuration = 10 seconds;
         lotteryEnd = lotteryStart + lotteryDuration;
+
+        contractBalance += nextGameBalance;
+        nextGameBalance = 0;
+
         emit ResetLottery();
         return true;
     }
 
     /** ------------ Getter ------------ **/
 
-    // function getWinner() public view returns (address) {
-    //     return lastWinner;
-    // }
-
     function getPlayers() public view returns (Player[] memory) {
         return players;
+    }
+
+    function getFirstWinners() public view returns (address[] memory) {
+        return firstWinners;
+    }
+
+    function getSecondWinners() public view returns (address[] memory) {
+        return secondWinners;
+    }
+
+    function getThirdWinners() public view returns (address[] memory) {
+        return thirdWinners;
     }
 
     function getTickets(address sender) public view returns (Ticket[] memory) {
