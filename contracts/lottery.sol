@@ -109,15 +109,6 @@ contract Lottery {
         owner = msg.sender;
         lotteryId = 0;
 
-        luckyNumber = [
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7))
-        ];
-
         // Time
         lotteryStart = block.timestamp;
         lotteryDuration = 10 seconds;
@@ -203,6 +194,15 @@ contract Lottery {
         if (lotteryId == 0) {
             revert("No player");
         }
+        
+        luckyNumber = [
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7)),
+            uint8(random(7))
+        ];
 
         for (uint256 i = 0; i < players.length; i++) {
             Player storage player = players[i];
@@ -275,15 +275,6 @@ contract Lottery {
         onlyAfter(lotteryEnd)
         returns (bool success)
     {
-        luckyNumber = [
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7))
-        ];
-
         lotteryEnded = true;
         lotteryStart = block.timestamp;
         lotteryDuration = 10 seconds;
