@@ -22,20 +22,21 @@ contract Lottery {
 
     // Lottery 관련
     address public owner;
-    uint256 private lotteryId = 0; // 게임 복권 갯수
-    uint256 private contractBalance = 0;
-    uint256 private nextGameBalance = 0;
+    uint256 public lotteryId = 0; // 게임 복권 갯수
+    uint256 public lastLotteryId = 0;
+    uint256 public contractBalance = 0;
+    uint256 public nextGameBalance = 0;
 
     // 게임 시간
     uint256 public lotteryStart;
-    uint256 public lotteryDuration;
+    uint256 public lotteryDuration = 5 minutes;
     uint256 public lotteryEnd;
 
-    uint256 private ticketMax = 20;
-    uint256 private ticketPrice = .15 ether;
-    uint256 private cutRate = 75; // 75%, float 없음
+    uint256 public constant ticketMax = 20;
+    uint256 public constant ticketPrice = .15 ether;
+    uint256 public constant cutRate = 75; // 75%, float 없음
 
-    uint8[] private luckyNumber; // private이 그 private 아님
+    uint8[] public luckyNumber; // private이 그 private 아님
 
     // mapping(address => Player) public players;
     Player[] public players; // 모든 플레이어 돌 때 용
@@ -61,8 +62,9 @@ contract Lottery {
     //
 
     // 이벤트
-    event TicketsBought(address indexed _from);
+    event TicketsBought(address indexed _from, uint8[6] number);
     event ResetLottery();
+    event LuckyNumber(uint8[6] number);
 
     error TooEarly(uint256 time);
     error TooLate(uint256 time);
@@ -115,13 +117,8 @@ contract Lottery {
 
         // Time
         lotteryStart = block.timestamp;
-        lotteryDuration = 10 seconds;
         lotteryEnd = lotteryStart + lotteryDuration;
     }
-
-    fallback() external payable {}
-
-    receive() external payable {}
 
     // TODO: ChainLink VRF 써서 unpredictable random number generate 하기
     function random(uint256 dom) private returns (uint256) {
@@ -148,7 +145,7 @@ contract Lottery {
         payable
         enoughTicket
         onlyBefore(lotteryEnd)
-        returns (bool success)
+        returns (uint8[6] memory numbers)
     {
         // if (msg.value < amount * ticketPrice) {
         //     return false; // 또는 돈 만큼 티켓 사주기
@@ -162,9 +159,9 @@ contract Lottery {
         }
 
         uint8[6] memory number = [
-            uint8(random(7)),
-            uint8(random(7)),
-            uint8(random(7)),
+            uint8(1),
+            uint8(2),
+            uint8(3),
             uint8(random(7)),
             uint8(random(7)),
             uint8(random(7))
@@ -176,12 +173,13 @@ contract Lottery {
 
         contractBalance += msg.value;
         lotteryId++; // dApp 에서 로또 총 몇개 팔렸는지 쉽게
-        emit TicketsBought(msg.sender);
-        return true;
+        emit TicketsBought(msg.sender, number);
+        return number;
     }
 
     function pickWinner()
         public
+        payable
         onlyAfter(lotteryEnd)
         enoughLottery
         restricted
@@ -192,8 +190,8 @@ contract Lottery {
         }
 
         luckyNumber = [
-            uint8(random(7)),
-            uint8(random(7)),
+            uint8(1),
+            uint8(2),
             uint8(random(7)),
             uint8(random(7)),
             uint8(random(7)),
@@ -232,7 +230,7 @@ contract Lottery {
         sendMoney();
     }
 
-    function sendMoney() private restricted enoughLottery {
+    function sendMoney() public payable restricted enoughLottery {
         actualPrice = (contractBalance / 100) * cutRate; // 75%, fixed point도 없음;
         contractBalance -= actualPrice;
 
@@ -256,22 +254,27 @@ contract Lottery {
 
         for (uint256 i = 0; i < players.length; i++) {
             Player storage player = players[i];
+
             eventMoney += player.firstTickets.length * firstMoney;
-            player.addr.transfer(player.firstTickets.length * firstMoney);
-
             eventMoney += player.secondTickets.length * secondMoney;
-            player.addr.transfer(player.secondTickets.length * secondMoney);
-
             eventMoney += player.thirdTickets.length * thirdMoney;
-            player.addr.transfer(player.thirdTickets.length * thirdMoney);
-        }
 
-        resetLottery();
+            if (player.firstTickets.length > 0) {
+                player.addr.transfer(player.firstTickets.length * firstMoney);
+            }
+            if (player.secondTickets.length > 0) {
+                player.addr.transfer(player.secondTickets.length * secondMoney);
+            }
+            if (player.thirdTickets.length > 0) {
+                player.addr.transfer(player.thirdTickets.length * thirdMoney);
+            }
+        }
     }
 
     // lotteryFinished
     function resetLottery()
         public
+        restricted
         onlyAfter(lotteryEnd)
         returns (bool success)
     {
@@ -280,6 +283,16 @@ contract Lottery {
 
         contractBalance += nextGameBalance;
         nextGameBalance = 0;
+
+        lastLotteryId = lotteryId;
+        lotteryId = 0;
+
+        for (uint256 i = 0; i < players.length; i++) {
+            Player storage player = players[i];
+            playerChecks[player.addr] = false;
+        }
+        delete players;
+        // TODO mapping reset?
 
         emit ResetLottery();
         return true;
@@ -307,8 +320,16 @@ contract Lottery {
         return ticketMap[sender];
     }
 
+    // function getTicketAmount(address sender) public view returns (uint256) {
+    //     return ticketMap[sender].length;
+    // }
+
     function getLuckyNumber() public view returns (uint8[] memory) {
         return luckyNumber;
+    }
+
+    function getLottoId() public view returns (uint256) {
+        return lotteryId;
     }
 
     function getWinMoney() public view returns (uint256) {
@@ -327,11 +348,23 @@ contract Lottery {
         return thirdMoney;
     }
 
-    function getTicketPrice() public view returns (uint256) {
+    function getTicketPrice() public pure returns (uint256) {
         return ticketPrice;
     }
 
     function getNextMoney() public view returns (uint256) {
         return nextGameBalance;
+    }
+
+    function getNow() public view returns (uint256) {
+        return block.timestamp;
+    }
+
+    function getOwner() public view returns (address) {
+        return owner;
+    }
+
+    function getEndTime() public view returns (uint256) {
+        return lotteryEnd;
     }
 }
