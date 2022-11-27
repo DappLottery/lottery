@@ -17,6 +17,10 @@ copy Ganache's deployed Lottery contract address to `App.svelete` const
 (auto-hot reload)
 
 ```bash
+yarn install
+```
+
+```bash
 yarn dev
 ```
 
