@@ -1,0 +1,84 @@
+<script>
+  export let web3;
+  export let contracts;
+
+  let lotteryId = 0;
+  let finishDate;
+  let nowDate = Date.now();
+  let remainTime = {
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  };
+  let winMoney;
+  let salesQuantity;
+  let managerAddr;
+
+  const fetchData = async () => {
+    try {
+      // lotteryId = await $contracts.Lottery.methods.getLottoId().call();
+      finishDate = await $contracts.Lottery.methods.getEndTime().call();
+      finishDate *= 1000;
+      winMoney = $web3.utils.fromWei(
+        await $contracts.Lottery.methods.getWinMoney().call(),
+        "ether"
+      );
+      salesQuantity = await $contracts.Lottery.methods.getLottoId().call();
+      managerAddr = await $contracts.Lottery.methods.getOwner().call();
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  };
+
+  const calTime = () => {
+    nowDate = Date.now();
+    const remainTotalTime = nowDate - finishDate;
+    let seconds = (remainTotalTime / 1000) - 1;
+
+    remainTime.days = Math.trunc(seconds / 86400);
+    seconds %= 86400;
+
+    remainTime.hours = Math.trunc(seconds / 3600);
+    seconds %= 3600;
+
+    remainTime.minutes = Math.trunc(seconds / 60);
+    seconds %= 60;
+
+    remainTime.seconds = Math.trunc(seconds);
+  }
+
+  const ms = 1000;
+  let clear;
+  $: {
+    clearInterval(clear)
+    clear = setInterval(calTime, ms)
+  }
+</script>
+
+<main>
+  {#await fetchData()}
+    Fetching contract dataset...
+  {:then _}
+    <div class="current-info">
+      <h3>{`${lotteryId}회차`}</h3>
+      <span>
+        {`종료 일자 : ${finishDate}`}
+        <br/>
+        {`현재 시간 : ${nowDate}`}
+        <br/>
+        {`남은 시간 : ${remainTime.days}일 ${remainTime.hours}시간 ${remainTime.minutes}분 ${remainTime.seconds}초`}
+        <br/>
+        {`판매액 : ${winMoney} ETH`}
+        <br/>
+        {`판매수량 : ${salesQuantity}개`}
+        <br/>
+        {`매니저 주소 : ${managerAddr}`}
+      <span/>
+    </div>
+  {/await}
+</main>
+
+<style>
+</style>

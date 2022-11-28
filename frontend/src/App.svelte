@@ -4,7 +4,7 @@
     defaultEvmStores as evm,
     connected,
     web3,
-    evmProviderType,
+    // evmProviderType,
     selectedAccount,
     chainId,
     chainData,
@@ -34,7 +34,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xDfaF5E86B37a38efFdB4C10fabA9587236bA6d22";
+  const LOTTERY_ON_GANACHE = "0xD970E3ad12811D44Ef91262d0320Da6854fEeA3f";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -218,6 +218,8 @@
       throw new Error(err);
     }
   };
+
+  import CurrentLottery from "./components/CurrentLottery.svelte";
 </script>
 
 <main>
@@ -227,11 +229,15 @@
   {#if !$connected}
     {#await connect()}Welcome!<br />{/await}
     {#if pending}connecting...{/if}
+    <h3>there's no metamask wallet...</h3>
   {:else}
     <h1>Lottery dApp</h1>
 
+    <CurrentLottery {web3} {contracts} />
+
     {#await $contracts.Lottery.methods.getOwner().call()}
       Checking admin...
+      <br/>
     {:then owner}
       {#if owner.toLowerCase() == $selectedAccount.toLowerCase()}
         Admin Menu
