@@ -11,6 +11,8 @@
     contracts,
   } from "svelte-web3";
 
+  import { Stretch } from "svelte-loading-spinners";
+
   // super basic router
   let route = window.location.pathname || "/";
   function click(e) {
@@ -225,8 +227,10 @@
     <Providers /> -->
 
   {#if !$connected}
-    {#await connect()}Welcome!<br />{/await}
-    {#if pending}connecting...{/if}
+    <!-- {#await connect()}Welcome!<br />{/await}
+    {#if pending}connecting...{/if} -->
+    <h1>Loading MetaMask...</h1>
+    <Stretch size="600" color="#FF3E00" duration="2s" />
   {:else}
     <h1>Lottery dApp</h1>
 
