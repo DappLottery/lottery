@@ -1,10 +1,13 @@
 <script>
+  import { now } from "svelte/internal";
+
+
   export let web3;
   export let contracts;
 
   let lotteryId = 0;
   let finishDate;
-  let nowDate = Date.now();
+  let nowDate;
   let remainTime = {
     days: 0,
     hours: 0,
@@ -19,41 +22,50 @@
     try {
       // lotteryId = await $contracts.Lottery.methods.getLottoId().call();
       finishDate = await $contracts.Lottery.methods.getEndTime().call();
-      finishDate *= 1000;
+      finishDate = Math.trunc(finishDate);
+      nowDate = await $contracts.Lottery.methods.getNow().call();
+      nowDate = Math.trunc(nowDate);
       winMoney = $web3.utils.fromWei(
         await $contracts.Lottery.methods.getWinMoney().call(),
         "ether"
       );
       salesQuantity = await $contracts.Lottery.methods.getLottoId().call();
       managerAddr = await $contracts.Lottery.methods.getOwner().call();
+
+      calcRemain();
     } catch (err) {
       console.log(err);
       throw new Error(err);
     }
   };
 
-  const calTime = () => {
-    nowDate = Date.now();
-    const remainTotalTime = nowDate - finishDate;
-    let seconds = (remainTotalTime / 1000) - 1;
+  const incrNow = () => { nowDate += 1 };
 
-    remainTime.days = Math.trunc(seconds / 86400);
-    seconds %= 86400;
+  const calcRemain = () => {
+    let remainSeconds = finishDate - nowDate - 1;
 
-    remainTime.hours = Math.trunc(seconds / 3600);
-    seconds %= 3600;
+    remainTime.days = Math.trunc(remainSeconds / 86400);
+    remainSeconds %= 86400;
 
-    remainTime.minutes = Math.trunc(seconds / 60);
-    seconds %= 60;
+    remainTime.hours = Math.trunc(remainSeconds / 3600);
+    remainSeconds %= 3600;
 
-    remainTime.seconds = Math.trunc(seconds);
+    remainTime.minutes = Math.trunc(remainSeconds / 60);
+    remainSeconds %= 60;
+
+    remainTime.seconds = Math.trunc(remainSeconds);
+  }
+
+  const updateRemain = () => {
+    incrNow();
+    calcRemain();
   }
 
   const ms = 1000;
   let clear;
   $: {
     clearInterval(clear)
-    clear = setInterval(calTime, ms)
+    clear = setInterval(updateRemain, ms)
   }
 </script>
 
