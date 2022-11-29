@@ -220,23 +220,23 @@
   };
 
   import MetaMask from "./components/Wallet/MetaMask.svelte";
-  import Current from "./components/LotteryInfo/Current.svelte";
+  import Header from "./components/Header.svelte";
   import TicketList from "./components/LotteryInfo/TicketList.svelte";
 </script>
 
 <main>
-  <!-- {#if /setprovider/.test(route)}
-    <Providers /> -->
+  <Header {web3} {contracts} />
 
   {#if !$connected}
-    {#await connect()}Welcome!<br />{/await}
+    {#await connect()}
+      <span>
+        Please connect MetaMask first.
+      </span>
+    {/await}
     {#if pending}connecting...{/if}
     <!-- <h3>there's no metamask wallet...</h3> -->
   {:else}
-    <h1>Lottery dApp</h1>
-
-    <MetaMask {disconnect} />
-    <Current {web3} {contracts} />
+    <!-- <MetaMask {disconnect} /> -->
 
     {#await $contracts.Lottery.methods.getOwner().call()}
       Checking admin...
@@ -281,8 +281,6 @@
         </span>
       </div>
     {/await}
-
-    <button class="button" on:click={disconnect}>logout</button>
 
     <TicketList {selectedAccount} {contracts} />
   {/if}
