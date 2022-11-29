@@ -219,6 +219,7 @@
     }
   };
 
+  import MetaMask from "./components/Wallet/MetaMask.svelte";
   import Current from "./components/LotteryInfo/Current.svelte";
 </script>
 
@@ -233,6 +234,7 @@
   {:else}
     <h1>Lottery dApp</h1>
 
+    <MetaMask />
     <Current {web3} {contracts} />
 
     {#await $contracts.Lottery.methods.getOwner().call()}
