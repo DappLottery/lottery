@@ -34,7 +34,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xD970E3ad12811D44Ef91262d0320Da6854fEeA3f";
+  const LOTTERY_ON_GANACHE = "0x03186e96Df911767D921b1e98d9A0ff72c8f4664";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -221,6 +221,7 @@
 
   import MetaMask from "./components/Wallet/MetaMask.svelte";
   import Current from "./components/LotteryInfo/Current.svelte";
+  import TicketList from "./components/LotteryInfo/TicketList.svelte";
 </script>
 
 <main>
@@ -230,11 +231,11 @@
   {#if !$connected}
     {#await connect()}Welcome!<br />{/await}
     {#if pending}connecting...{/if}
-    <h3>there's no metamask wallet...</h3>
+    <!-- <h3>there's no metamask wallet...</h3> -->
   {:else}
     <h1>Lottery dApp</h1>
 
-    <MetaMask />
+    <MetaMask {disconnect} />
     <Current {web3} {contracts} />
 
     {#await $contracts.Lottery.methods.getOwner().call()}
@@ -280,6 +281,10 @@
         </span>
       </div>
     {/await}
+
+    <button class="button" on:click={disconnect}>logout</button>
+
+    <TicketList {selectedAccount} {contracts} />
   {/if}
 
   {#if !/^\/$/.test(route)}

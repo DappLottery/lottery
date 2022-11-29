@@ -1,4 +1,6 @@
 <script>
+  export let disconnect;
+  
   let connected = false;
   let installed = false;
   let walletConnected = false;
@@ -19,6 +21,8 @@
     connected = await isMetaMaskConnected();
     installed = isMetaMaskInstalled();
     walletConnected = installed && connected;
+
+    if (!walletConnected) disconnect();
   }
 
   async function connectWallet() {
@@ -29,8 +33,7 @@
     await ethereum
     .request({ method: 'eth_requestAccounts' })
     .then((accountList) => {
-      const [firstAccount] = accountList;
-      account = firstAccount;
+      account = accountList[0];
       walletConnected = true;
       console.log('wallet connected');
       console.log(account);
@@ -49,20 +52,31 @@
 </script>
 
 <div>
-  {#if walletConnected}
+  {#if installed}
     <div>
-      <span class="dotConnected" />
-      Connected Account: {account}
+      {#if walletConnected}
+        <div>
+          <span class="dotConnected" />
+          Connected Account: {account}
+        </div>
+      {:else} 
+        <div>
+          <button class="button buttonMetaMask" on:click={connectWallet}>
+            Connect MetaMask
+          </button>
+          <br/>
+          <span class="req-msg">
+            Please connect MetaMask first.
+          </span>
+        </div>
+        
+      {/if}
     </div>
-  {:else} 
-    <button class="button buttonMetaMask" on:click={connectWallet}>
-      Connect MetaMask
-    </button>
+  {:else}
+    <div>
+      <span>Please install MetaMask...</span>
+    </div>
   {/if}
-
-  <div class="network">
-    After connecting MetaMask, please switch to Ropsten TestNet.
-  </div>
 </div>
 
 <style>
