@@ -69,7 +69,7 @@
   }
 </script>
 
-<main>
+<div>
   {#await fetchData()}
     Fetching contract dataset...
   {:then _}
@@ -90,7 +90,7 @@
       <span/>
     </div>
   {/await}
-</main>
+</div>
 
 <style>
 </style>
