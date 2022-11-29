@@ -1,7 +1,4 @@
 <script>
-  import { now } from "svelte/internal";
-
-
   export let web3;
   export let contracts;
 
