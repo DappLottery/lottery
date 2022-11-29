@@ -219,7 +219,7 @@
     }
   };
 
-  import CurrentLottery from "./components/CurrentLottery.svelte";
+  import Current from "./components/LotteryInfo/Current.svelte";
 </script>
 
 <main>
@@ -233,7 +233,7 @@
   {:else}
     <h1>Lottery dApp</h1>
 
-    <CurrentLottery {web3} {contracts} />
+    <Current {web3} {contracts} />
 
     {#await $contracts.Lottery.methods.getOwner().call()}
       Checking admin...
