@@ -40,13 +40,13 @@
           </tr>
         </thead>
         <tbody>
+          {#each myTickets as myTicket, i}
           <tr>
-            {#each myTickets as myTicket, i}
-              <th scope="row">{i}</th>
+              <th scope="row">{i+1}</th>
               <td>{myTicket.id}</td>
               <td>{myTicket.number}</td>
-            {/each}
           </tr>
+          {/each}
         </tbody>
       </table>
     </div>
