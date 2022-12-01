@@ -35,7 +35,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0x03186e96Df911767D921b1e98d9A0ff72c8f4664";
+  const LOTTERY_ON_GANACHE = "0x7bA352aEdDa744D008FEc7D43434Ca538E60c78E";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -49,6 +49,7 @@
   let firstWinners;
   let secondWinners;
   let thirdWinners;
+  let myTickets;
 
   const connect = async () => {
     pending = true;
@@ -154,52 +155,6 @@
     }
   };
 
-  const pickWinner = async () => {
-    try {
-      $contracts.Lottery.methods
-        .pickWinner()
-        .send({
-          from: $selectedAccount,
-          gasLimit: 6721975,
-          gasPrice: 30000000000,
-        })
-        .on("receipt", function (receipt) {
-          // console.log("receipt:", receipt);
-
-          fetchData();
-        });
-    } catch (err) {
-      console.log(err);
-    }
-
-    console.log(luckyNumber);
-  };
-
-  const resetLottery = async () => {
-    try {
-      await $contracts.Lottery.methods
-        .resetLottery()
-        .send({ from: $selectedAccount });
-    } catch (err) {
-      console.log(err);
-    }
-
-    fetchData();
-  };
-
-  const fetchWinners = async () => {
-    try {
-      firstWinners = await $contracts.Lottery.methods.getFirstWinners().call();
-      secondWinners = await $contracts.Lottery.methods
-        .getSecondWinners()
-        .call();
-      thirdWinners = await $contracts.Lottery.methods.getThirdWinners().call();
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
-    }
-  };
-
   const fetchData = async () => {
     try {
       ticketPrice = $web3.utils.fromWei(
@@ -214,48 +169,35 @@
         await $contracts.Lottery.methods.getWinMoney().call(),
         "ether"
       );
+
+      myTickets = await $contracts.Lottery.methods
+        .getTickets($selectedAccount)
+        .call();
     } catch (err) {
       console.log(err);
       throw new Error(err);
     }
   };
 
-  import MetaMask from "./components/Wallet/MetaMask.svelte";
+  // import MetaMask from "./components/Wallet/MetaMask.svelte";
+  // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header.svelte";
   import TicketList from "./components/LotteryInfo/TicketList.svelte";
+  import Admin from "./components/Account/Admin.svelte";
 </script>
 
 <main>
-  <Header {web3} {contracts} />
 
   {#if !$connected}
-    {#await connect()}
-      <span>
-        Please connect MetaMask first.
-      </span>
-    {/await}
-    {#if pending}connecting...{/if}
-    <!-- <h3>there's no metamask wallet...</h3> -->
+    <!-- {#await connect()}Welcome!<br />{/await}
+    {#if pending}connecting...{/if} -->
+    <h1>Loading MetaMask...</h1>
+    <Stretch size="600" color="#FF3E00" duration="2s" />
   {:else}
-    <!-- <MetaMask {disconnect} /> -->
+    <Header {web3} {contracts} />
+    <!-- <LoginTest {connected} {connect} {pending} {disconnect} {selectedAccount} /> -->
 
-    {#await $contracts.Lottery.methods.getOwner().call()}
-      Checking admin...
-      <br/>
-    {:then owner}
-      {#if owner.toLowerCase() == $selectedAccount.toLowerCase()}
-        Admin Menu
-        <div class="card">
-          <button class="button" on:click={pickWinner}>Pick Winner</button>
-          <!-- <button class="button" on:click={sendMoney}>Send Money</button> -->
-          <button class="button" on:click={resetLottery}>Reset Lottery</button>
-        </div>
-
-        {#await fetchWinners()}
-          {firstWinners} and {secondWinners} and {thirdWinners}
-        {/await}
-      {/if}
-    {/await}
+    <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
 
     Ticket Menu
     <div class="card">
@@ -275,15 +217,15 @@
           <br />
           Players: {players}
           <br />
-          Lucky Number: {luckyNumber === "" ? luckyNumber : "Not yet"}
+          Lucky Number: {luckyNumber !== "" ? luckyNumber : "Not yet"}
           <br />
           Total Win Money: {winMoney} ETH
           <br />
         </span>
       </div>
-    {/await}
 
-    <TicketList {selectedAccount} {contracts} />
+      <TicketList {myTickets} />
+    {/await}
   {/if}
 
   {#if !/^\/$/.test(route)}
