@@ -10,6 +10,7 @@
     chainData,
     contracts,
   } from "svelte-web3";
+  import { Stretch } from "svelte-loading-spinners";
 
   // super basic router
   let route = window.location.pathname || "/";
