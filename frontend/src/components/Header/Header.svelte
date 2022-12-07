@@ -1,5 +1,6 @@
 <script>
 	import Logo from "./Logo.svelte";
+	import Nav from "./Nav.svelte";
 
 	export let selectedAccount;
 </script>
@@ -13,9 +14,9 @@
 		<span>Title</span>
 	</div>
 
-	<div class="nav">
-		<!-- <Menu /> -->
-	</div>
+	<nav>
+		<Nav />
+	</nav>
 </header>
 
 <style>
@@ -28,7 +29,7 @@
 
 	.logo,
 	.title,
-	.nav {
+	nav {
 		position: absolute;
 	}
 
@@ -43,7 +44,7 @@
 		transform: translate(-50%, 0);
 	}
 
-	.nav {
+	nav {
 		right: 0%;
 		transform: translate(-100%, 0);
 		/* padding-right: 10px; */

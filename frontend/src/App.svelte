@@ -11,6 +11,7 @@
     contracts,
   } from "svelte-web3";
   import { Stretch } from "svelte-loading-spinners";
+  import { Router, Route } from "svelte-navigator";
 
   // super basic router
   let route = window.location.pathname || "/";
@@ -35,7 +36,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xb8457fddb84Ec24c57aec4E2318116D96242AD6f";
+  const LOTTERY_ON_GANACHE = "0x72FA538274C6779114dCaf5ea269F38fCB102ee5";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -192,40 +193,44 @@
   <h1>Loading MetaMask...</h1>
   <Stretch size="600" color="#FF3E00" duration="2s" />
 {:else}
-  <Header {selectedAccount} />
-  <!-- <LoginTest {connected} {connect} {pending} {disconnect} {selectedAccount} /> -->
+  <Router>
+    <Route path="/">
+      <Header {selectedAccount} />
+      <!-- <LoginTest {connected} {connect} {pending} {disconnect} {selectedAccount} /> -->
 
-  <main>
-    <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
+      <main>
+        <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
 
-    Ticket Menu
-    <div class="card">
-      <button class="button" on:click={buyTicket}>Buy Ticket</button>
-      <!-- <button class="button" on:click={disconnect}>Logout</button> -->
-      <br />{ticketNumber === undefined ? "" : "Your number: " + ticketNumber}
-    </div>
+        Ticket Menu
+        <div class="card">
+          <button class="button" on:click={buyTicket}>Buy Ticket</button>
+          <!-- <button class="button" on:click={disconnect}>Logout</button> -->
+          <br />{ticketNumber === undefined ? "" : "Your number: " + ticketNumber}
+        </div>
 
-    {#await fetchData()}
-      Fetching contract dataset...
-    {:then _}
-      <div class="card">
-        <span>
-          Ticket Price: {ticketPrice} ETH
-          <br />
-          Number of tickets sold: {numTicketSold}
-          <br />
-          Players: {players}
-          <br />
-          Lucky Number: {luckyNumber !== "" ? luckyNumber : "Not yet"}
-          <br />
-          Total Win Money: {winMoney} ETH
-          <br />
-        </span>
-      </div>
+        {#await fetchData()}
+          Fetching contract dataset...
+        {:then _}
+          <div class="card">
+            <span>
+              Ticket Price: {ticketPrice} ETH
+              <br />
+              Number of tickets sold: {numTicketSold}
+              <br />
+              Players: {players}
+              <br />
+              Lucky Number: {luckyNumber !== "" ? luckyNumber : "Not yet"}
+              <br />
+              Total Win Money: {winMoney} ETH
+              <br />
+            </span>
+          </div>
 
-      <TicketList {myTickets} />
-    {/await}
-  </main>
+          <TicketList {myTickets} />
+        {/await}
+      </main>
+    </Route>
+  </Router>
 {/if}
 
 {#if !/^\/$/.test(route)}
