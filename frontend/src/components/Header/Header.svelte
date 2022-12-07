@@ -1,17 +1,19 @@
 <script>
+	import Logo from "./Logo.svelte";
 
+	export let selectedAccount;
 </script>
 
 <header>
-	<div class="account">
-		<!-- <Account /> -->
+	<div class="logo">
+		<Logo {selectedAccount} />
 	</div>
 
 	<div class="title">
 		<span>Title</span>
 	</div>
 
-	<div class="menu">
+	<div class="nav">
 		<!-- <Menu /> -->
 	</div>
 </header>
@@ -19,25 +21,29 @@
 <style>
 	header {
 		position: relative;
+		/* width: 80vw; */
+		max-width: 1000px;
+		height: 70px;
 	}
 
-	.account,
+	.logo,
 	.title,
-	.menu {
+	.nav {
 		position: absolute;
 	}
 
-	.account {
+	.logo {
 		left: 0%;
-		padding-left: 30px;
+		/* padding-left: 30px; */
+		text-align: left;
 	}
 
 	.title {
 		left: 50%;
 		transform: translate(-50%, 0);
 	}
-	
-	.menu {
+
+	.nav {
 		right: 0%;
 		transform: translate(-100%, 0);
 		/* padding-right: 10px; */

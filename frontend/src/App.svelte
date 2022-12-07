@@ -35,7 +35,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0x7bA352aEdDa744D008FEc7D43434Ca538E60c78E";
+  const LOTTERY_ON_GANACHE = "0xb8457fddb84Ec24c57aec4E2318116D96242AD6f";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -181,22 +181,21 @@
 
   // import MetaMask from "./components/Wallet/MetaMask.svelte";
   // import LoginTest from "./components/Wallet/LoginTest.svelte";
-  import Header from "./components/Header.svelte";
+  import Header from "./components/Header/Header.svelte";
   import TicketList from "./components/LotteryInfo/TicketList.svelte";
   import Admin from "./components/Account/Admin.svelte";
 </script>
 
-<main>
+{#if !$connected}
+  <!-- {#await connect()}Welcome!<br />{/await}
+  {#if pending}connecting...{/if} -->
+  <h1>Loading MetaMask...</h1>
+  <Stretch size="600" color="#FF3E00" duration="2s" />
+{:else}
+  <Header {selectedAccount} />
+  <!-- <LoginTest {connected} {connect} {pending} {disconnect} {selectedAccount} /> -->
 
-  {#if !$connected}
-    <!-- {#await connect()}Welcome!<br />{/await}
-    {#if pending}connecting...{/if} -->
-    <h1>Loading MetaMask...</h1>
-    <Stretch size="600" color="#FF3E00" duration="2s" />
-  {:else}
-    <Header {web3} {contracts} />
-    <!-- <LoginTest {connected} {connect} {pending} {disconnect} {selectedAccount} /> -->
-
+  <main>
     <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
 
     Ticket Menu
@@ -226,12 +225,12 @@
 
       <TicketList {myTickets} />
     {/await}
-  {/if}
+  </main>
+{/if}
 
-  {#if !/^\/$/.test(route)}
-    <self />
-  {/if}
-</main>
+{#if !/^\/$/.test(route)}
+  <self />
+{/if}
 
 <style>
 </style>
