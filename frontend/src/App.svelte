@@ -194,13 +194,10 @@
   <Stretch size="600" color="#FF3E00" duration="2s" />
 {:else}
   <Router>
-    <Route path="/">
-      <Header {selectedAccount} />
-      <!-- <LoginTest {connected} {connect} {pending} {disconnect} {selectedAccount} /> -->
+    <Header {selectedAccount} />
 
-      <main>
-        <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
-
+    <main>
+      <Route path="/">
         Ticket Menu
         <div class="card">
           <button class="button" on:click={buyTicket}>Buy Ticket</button>
@@ -228,8 +225,16 @@
 
           <TicketList {myTickets} />
         {/await}
-      </main>
-    </Route>
+      </Route>
+
+      <Route path="/history">
+        <div></div>
+      </Route>
+  
+      <Route path="/admin">
+        <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
+      </Route>
+    </main>
   </Router>
 {/if}
 

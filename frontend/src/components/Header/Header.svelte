@@ -23,7 +23,7 @@
 	header {
 		position: relative;
 		/* width: 80vw; */
-		max-width: 1000px;
+		width: 1000px;
 		height: 70px;
 	}
 
@@ -35,7 +35,6 @@
 
 	.logo {
 		left: 0%;
-		/* padding-left: 30px; */
 		text-align: left;
 	}
 
@@ -46,7 +45,5 @@
 
 	nav {
 		right: 0%;
-		transform: translate(-100%, 0);
-		/* padding-right: 10px; */
 	}
 </style>

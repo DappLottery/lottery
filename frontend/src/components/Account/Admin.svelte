@@ -72,6 +72,8 @@
       {#await fetchWinners()}
         {firstWinners} and {secondWinners} and {thirdWinners}
       {/await}
+    {:else}
+      권한이 없는 페이지 입니다.
     {/if}
   {/await}
 </div>
