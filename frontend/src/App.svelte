@@ -36,7 +36,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0x72FA538274C6779114dCaf5ea269F38fCB102ee5";
+  const LOTTERY_ON_GANACHE = "0xf247237087F60b9DDB53121580EDa8b817bEA7E5";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -122,40 +122,6 @@
     });
   };
 
-  const buyTicket = async () => {
-    try {
-      $contracts.Lottery.methods
-        .buyTicket()
-        .send({
-          from: $selectedAccount,
-          value: $web3.utils.toWei("0.15", "ether"),
-          gasLimit: 6721975,
-          gasPrice: 30000000000,
-        })
-        .on("transactionHash", function (hash) {
-          console.log("transactionHash:", HashChangeEvent);
-        })
-        .on("receipt", function (receipt) {
-          ticketNumber = receipt.events.TicketsBought.returnValues.number;
-
-          fetchData();
-
-          console.log("receipt:", receipt);
-        })
-        .on("confirmation", function (confirmationNumber, receipt) {
-          console.log("confirmation", confirmationNumber);
-        })
-        .on("error", console.error); // If a out of gas error, the second parameter is the receipt.;
-      // console.log("tx:", tx);
-      // if (tx.status === true) {
-      //   // getTransactionReceiptMined(tx.transactionHash, 1000);
-      //   console.log(ticketNumber);
-      // }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const fetchData = async () => {
     try {
       ticketPrice = $web3.utils.fromWei(
@@ -183,6 +149,7 @@
   // import MetaMask from "./components/Wallet/MetaMask.svelte";
   // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header/Header.svelte";
+  import TicketBuy from "./components/LotteryInfo/TicketBuy.svelte";
   import TicketList from "./components/LotteryInfo/TicketList.svelte";
   import Admin from "./components/Account/Admin.svelte";
 </script>
@@ -198,12 +165,7 @@
 
     <main>
       <Route path="/">
-        Ticket Menu
-        <div class="card">
-          <button class="button" on:click={buyTicket}>Buy Ticket</button>
-          <!-- <button class="button" on:click={disconnect}>Logout</button> -->
-          <br />{ticketNumber === undefined ? "" : "Your number: " + ticketNumber}
-        </div>
+        <TicketBuy {fetchData} />
 
         {#await fetchData()}
           Fetching contract dataset...
