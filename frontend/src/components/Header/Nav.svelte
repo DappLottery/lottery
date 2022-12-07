@@ -8,12 +8,12 @@
 
 <Link to="/">Main</Link>
 <span> | </span>
-<Link to="/history">History</Link>
+<Link to="history">History</Link>
 {#await $contracts.Lottery.methods.getOwner().call()}
   <div></div>
 {:then owner}
   {#if owner.toLowerCase() == $selectedAccount.toLowerCase()}
     <span> | </span>
-    <Link to="/admin">Admin</Link>
+    <Link to="admin">Admin</Link>
   {/if}
 {/await}

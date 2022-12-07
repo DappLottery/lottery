@@ -227,11 +227,11 @@
         {/await}
       </Route>
 
-      <Route path="/history">
+      <Route path="history">
         <div></div>
       </Route>
   
-      <Route path="/admin">
+      <Route path="admin">
         <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
       </Route>
     </main>
