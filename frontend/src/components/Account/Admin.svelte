@@ -1,4 +1,6 @@
 <script>
+	import { useNavigate } from "svelte-navigator";
+
   export let contracts;
   export let selectedAccount;
 
@@ -54,6 +56,8 @@
       throw new Error(err);
     }
   };
+
+  const navigate = useNavigate();
 </script>
 
 <div>
@@ -73,7 +77,8 @@
         {firstWinners} and {secondWinners} and {thirdWinners}
       {/await}
     {:else}
-      권한이 없는 페이지 입니다.
+      <!-- 권한이 없는 페이지 입니다. -->
+      {navigate("/")}
     {/if}
   {/await}
 </div>
