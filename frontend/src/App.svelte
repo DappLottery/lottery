@@ -194,7 +194,7 @@
   <Stretch size="600" color="#FF3E00" duration="2s" />
 {:else}
   <Router>
-    <Header {selectedAccount} />
+    <Header />
 
     <main>
       <Route path="/">

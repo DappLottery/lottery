@@ -1,13 +1,11 @@
 <script>
 	import Logo from "./Logo.svelte";
 	import Nav from "./Nav.svelte";
-
-	export let selectedAccount;
 </script>
 
 <header>
 	<div class="logo">
-		<Logo {selectedAccount} />
+		<Logo />
 	</div>
 
 	<div class="title">

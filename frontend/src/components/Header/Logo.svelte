@@ -1,7 +1,9 @@
 <script>
-  export let selectedAccount;
-  
-  const accountAddr = () => {
+  import {
+    selectedAccount,
+  } from "svelte-web3";
+
+  const accountSubstring = () => {
     let _accountAddr = $selectedAccount;
     let addr = "";
     
@@ -11,12 +13,17 @@
 
     return addr;
   };
+  let accountAddr = accountSubstring();
+
+  setInterval(() => {
+    accountAddr = accountSubstring();
+  }, 1000);
 </script>
 
 <h3 class="title-logo">dApp Lottery</h3>
-<span>User: {accountAddr()}</span>
-<!-- <br/> -->
-<!-- <span>User: {$selectedAccount}</span> -->
+<span>User: {accountAddr}</span>
+<!-- <br/>
+<span>User: {typeof $selectedAccount}</span> -->
 
 <style>
   .title-logo {
