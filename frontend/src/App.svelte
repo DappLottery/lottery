@@ -151,6 +151,7 @@
   import Header from "./components/Header/Header.svelte";
   import CurrentLottery from "./components/LotteryInfo/CurrentLottery.svelte";
   import Admin from "./components/Account/Admin.svelte";
+  import Exception from "./components/Error/Exception.svelte";
 </script>
 
 {#if !$connected}
@@ -163,8 +164,16 @@
     <Header />
 
     <main>
-      <Route path="/">
-        <CurrentLottery />
+      <Route basepath="/">
+        <Route path="prev">
+          <div>previous history</div>
+        </Route>
+        <Route path="cur">
+          <CurrentLottery />
+        </Route>
+        <Route path="*">
+          <Exception defaultPath={"/cur"} />
+        </Route>
       </Route>
 
       <Route path="history">
