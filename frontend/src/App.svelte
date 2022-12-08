@@ -48,6 +48,8 @@
   let firstWinners;
   let secondWinners;
   let thirdWinners;
+  //hansik
+  let Order = ["First", "Second", "Third"];
 
   const connect = async () => {
     pending = true;
@@ -218,10 +220,24 @@
       throw new Error(err);
     }
   };
-
+  
+  //hansik
+  const fetchMyTickets = async () => {
+    try{
+    myTickets = await $contracts.Lottery.methods
+        .getTickets($selectedAccount)
+        .call();
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  };
+  
   import MetaMask from "./components/Wallet/MetaMask.svelte";
   import Current from "./components/LotteryInfo/Current.svelte";
-  import TicketList from "./components/LotteryInfo/TicketList.svelte";
+  //hansik
+  import MyTicketList from "./components/List/MyTicketList.svelte";
+  import HistoryList from "./components/List/HistoryList.svelte";
 </script>
 
 <main>
@@ -290,6 +306,21 @@
   {#if !/^\/$/.test(route)}
     <self />
   {/if}
+  
+  <!-- hansik -->
+  #await fetchMyTickets()}
+      Fetching contract dataset...
+    {:then _}
+  <MyTicketList {selectedAccount} {contracts}/>
+  {/await}
+  {#await fetchWinners()}
+      Fetching contract dataset...
+    {:then _}
+  <HistoryList tableData={firstWinners} order={"First"}/>
+  <HistoryList tableData={secondWinners} order={"Second"}/>
+  <HistoryList tableData={thirdWinners} order={"Third"}/>
+  {/await}
+  
 </main>
 
 <style>
