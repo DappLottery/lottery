@@ -51,6 +51,7 @@
   let secondWinners;
   let thirdWinners;
   let myTickets;
+  let lotteryId = 0;
 
   const connect = async () => {
     pending = true;
@@ -150,6 +151,7 @@
   // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header/Header.svelte";
   import CurrentLottery from "./components/LotteryInfo/CurrentLottery.svelte";
+  import PastLottery from "./components/LotteryInfo/PastLottery.svelte";
   import Admin from "./components/Account/Admin.svelte";
   import Exception from "./components/Error/Exception.svelte";
 </script>
@@ -166,7 +168,7 @@
     <main>
       <Route basepath="/">
         <Route path="prev">
-          <div>previous history</div>
+          <PastLottery bind:lotteryId={lotteryId} />
         </Route>
         <Route path="cur">
           <CurrentLottery />
