@@ -36,7 +36,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xf247237087F60b9DDB53121580EDa8b817bEA7E5";
+  const LOTTERY_ON_GANACHE = "0x6852E606C00BdEcc49E699DBA84CaAB5e2e810F9";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -149,8 +149,7 @@
   // import MetaMask from "./components/Wallet/MetaMask.svelte";
   // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header/Header.svelte";
-  import CurrentInfo from "./components/LotteryInfo/CurrentInfo.svelte";
-  import TicketList from "./components/LotteryInfo/TicketList.svelte";
+  import CurrentLottery from "./components/LotteryInfo/CurrentLottery.svelte";
   import Admin from "./components/Account/Admin.svelte";
 </script>
 
@@ -165,29 +164,7 @@
 
     <main>
       <Route path="/">
-        <CurrentInfo {fetchData} />
-
-        <!-- TODO: current lottery info -->
-        {#await fetchData()}
-          Fetching contract dataset...
-        {:then _}
-          <div class="card">
-            <span>
-              Ticket Price: {ticketPrice} ETH
-              <br />
-              Number of tickets sold: {numTicketSold}
-              <br />
-              Players: {players}
-              <br />
-              Lucky Number: {luckyNumber !== "" ? luckyNumber : "Not yet"}
-              <br />
-              Total Win Money: {winMoney} ETH
-              <br />
-            </span>
-          </div>
-
-          <TicketList {myTickets} />
-        {/await}
+        <CurrentLottery />
       </Route>
 
       <Route path="history">
