@@ -1,6 +1,8 @@
 <script>
-  export let web3;
-  export let contracts;
+  import {
+    web3,
+    contracts,
+  } from "svelte-web3";
 
   let lotteryId = 0;
   let finishDate;

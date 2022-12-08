@@ -149,7 +149,7 @@
   // import MetaMask from "./components/Wallet/MetaMask.svelte";
   // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header/Header.svelte";
-  import TicketBuy from "./components/LotteryInfo/TicketBuy.svelte";
+  import CurrentInfo from "./components/LotteryInfo/CurrentInfo.svelte";
   import TicketList from "./components/LotteryInfo/TicketList.svelte";
   import Admin from "./components/Account/Admin.svelte";
 </script>
@@ -165,8 +165,9 @@
 
     <main>
       <Route path="/">
-        <TicketBuy {fetchData} />
+        <CurrentInfo {fetchData} />
 
+        <!-- TODO: current lottery info -->
         {#await fetchData()}
           Fetching contract dataset...
         {:then _}
