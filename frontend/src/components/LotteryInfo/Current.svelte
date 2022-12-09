@@ -1,6 +1,5 @@
 <script>
   import {
-    web3,
     contracts,
   } from "svelte-web3";
 
@@ -23,8 +22,7 @@
       // lotteryId = await $contracts.Lottery.methods.getLottoId().call();
       finishDate = await $contracts.Lottery.methods.getEndTime().call();
       finishDate = Math.trunc(finishDate);
-      nowDate = await $contracts.Lottery.methods.getNow().call();
-      nowDate = Math.trunc(nowDate);
+      nowDate = Math.trunc((new Date()).getTime() / 1000);
       managerAddr = await $contracts.Lottery.methods.getOwner().call();
 
       calcRemain();
