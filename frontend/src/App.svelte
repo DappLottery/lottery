@@ -13,8 +13,6 @@
   import { Stretch } from "svelte-loading-spinners";
   import { Router, Route } from "svelte-navigator";
 
-  import { Stretch } from "svelte-loading-spinners";
-
   // super basic router
   let route = window.location.pathname || "/";
   function click(e) {
@@ -38,7 +36,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0x6852E606C00BdEcc49E699DBA84CaAB5e2e810F9";
+  const LOTTERY_ON_GANACHE = "0xCb88d51d4A7AAB70a00644c5aFC9B065744ef5Da";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -185,7 +183,7 @@
       </Route>
   
       <Route path="admin">
-        <Admin {contracts} {selectedAccount} {fetchData} {luckyNumber} />
+        <Admin />
       </Route>
     </main>
   </Router>

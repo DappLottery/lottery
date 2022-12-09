@@ -1,11 +1,12 @@
 <script>
+  import {
+    contracts,
+    selectedAccount,
+  } from "svelte-web3";
+
 	import { useNavigate } from "svelte-navigator";
 
-  export let contracts;
-  export let selectedAccount;
-
-  export let fetchData;
-  export let luckyNumber;
+  // export let fetchData;
 
   let firstWinners;
   let secondWinners;
@@ -22,14 +23,12 @@
         })
         .on("receipt", function (receipt) {
           // console.log("receipt:", receipt);
-
-          fetchData();
         });
     } catch (err) {
       console.log(err);
     }
 
-    console.log(luckyNumber);
+    fetchWinners();
   };
 
   const resetLottery = async () => {
@@ -40,8 +39,6 @@
     } catch (err) {
       console.log(err);
     }
-
-    fetchData();
   };
 
   const fetchWinners = async () => {
@@ -74,6 +71,8 @@
       </div>
 
       {#await fetchWinners()}
+        Fetching contract dataset...
+      {:then _}
         {firstWinners} and {secondWinners} and {thirdWinners}
       {/await}
     {:else}
