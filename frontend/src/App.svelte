@@ -13,6 +13,8 @@
   import { Stretch } from "svelte-loading-spinners";
   import { Router, Route } from "svelte-navigator";
 
+  import { Stretch } from "svelte-loading-spinners";
+
   // super basic router
   let route = window.location.pathname || "/";
   function click(e) {
