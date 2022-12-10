@@ -5,9 +5,6 @@
     connected,
     web3,
     // evmProviderType,
-    selectedAccount,
-    chainId,
-    chainData,
     contracts,
   } from "svelte-web3";
   import { Stretch } from "svelte-loading-spinners";
@@ -41,16 +38,6 @@
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
   let pending = false;
-  let ticketPrice;
-  let ticketNumber;
-  let numTicketSold;
-  let players;
-  let luckyNumber;
-  let winMoney;
-  let firstWinners;
-  let secondWinners;
-  let thirdWinners;
-  let myTickets;
   let lotteryId = 0;
 
   const connect = async () => {
@@ -123,32 +110,6 @@
     });
   };
 
-  const fetchData = async () => {
-    try {
-      ticketPrice = $web3.utils.fromWei(
-        await $contracts.Lottery.methods.getTicketPrice().call(),
-        "ether"
-      );
-      numTicketSold = await $contracts.Lottery.methods.getLottoId().call();
-      players = await $contracts.Lottery.methods.getPlayers().call();
-
-      luckyNumber = await $contracts.Lottery.methods.getLuckyNumber().call();
-      winMoney = $web3.utils.fromWei(
-        await $contracts.Lottery.methods.getWinMoney().call(),
-        "ether"
-      );
-
-      myTickets = await $contracts.Lottery.methods
-        .getTickets($selectedAccount)
-        .call();
-    } catch (err) {
-      console.log(err);
-      throw new Error(err);
-    }
-  };
-
-  // import MetaMask from "./components/Wallet/MetaMask.svelte";
-  // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header/Header.svelte";
   import InfoNav from "./components/Header/InfoNav.svelte";
   import HistoryNav from "./components/Header/HistoryNav.svelte";
