@@ -8,10 +8,6 @@
 		<Logo />
 	</div>
 
-	<div class="title">
-		<span>Title</span>
-	</div>
-
 	<nav>
 		<Nav />
 	</nav>
@@ -26,7 +22,6 @@
 	}
 
 	.logo,
-	.title,
 	nav {
 		position: absolute;
 	}
@@ -34,11 +29,6 @@
 	.logo {
 		left: 0%;
 		text-align: left;
-	}
-
-	.title {
-		left: 50%;
-		transform: translate(-50%, 0);
 	}
 
 	nav {
