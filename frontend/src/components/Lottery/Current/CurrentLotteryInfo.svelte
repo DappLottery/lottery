@@ -1,5 +1,6 @@
 <script>
   import {
+    web3,
     contracts,
   } from "svelte-web3";
 
@@ -24,6 +25,12 @@
       finishDate = Math.trunc(finishDate);
       nowDate = Math.trunc((new Date()).getTime() / 1000);
       managerAddr = await $contracts.Lottery.methods.getOwner().call();
+      
+      numTicketSold = await $contracts.Lottery.methods.getLottoId().call();
+      winMoney = $web3.utils.fromWei(
+        await $contracts.Lottery.methods.getWinMoney().call(),
+        "ether"
+      );
 
       calcRemain();
     } catch (err) {
@@ -60,6 +67,10 @@
     clearInterval(clear)
     clear = setInterval(updateRemain, ms)
   }
+
+  setInterval(() => {
+    fetchData();
+  }, 30 * 1000)
 </script>
 
 <div>
