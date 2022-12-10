@@ -36,7 +36,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xCb88d51d4A7AAB70a00644c5aFC9B065744ef5Da";
+  const LOTTERY_ON_GANACHE = "0xd4E9463a1141212324c541d9DC7A9CD987efE9AE";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -152,9 +152,14 @@
   import Header from "./components/Header/Header.svelte";
   import InfoNav from "./components/Header/InfoNav.svelte";
   import HistoryNav from "./components/Header/HistoryNav.svelte";
+
   import CurrentLottery from "./components/LotteryInfo/CurrentLottery.svelte";
   import PastLottery from "./components/LotteryInfo/PastLottery.svelte";
+
+  import TicketHistory from "./components/History/TicketHistory.svelte";
+
   import Admin from "./components/Account/Admin.svelte";
+
   import Exception from "./components/Error/Exception.svelte";
 </script>
 
@@ -180,7 +185,7 @@
           </Route>
         </Route>
         <Route path="ticket">
-          ticket list page
+          <TicketHistory />
         </Route>
         <Route path="*">
           <Exception defaultPath={"/history/lottery"} />
