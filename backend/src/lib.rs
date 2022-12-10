@@ -9,9 +9,7 @@ extern crate serde_derive;
 // #[macro_use]
 extern crate serde_json;
 
-extern crate chrono;
 extern crate mongodb;
-extern crate rand;
 
 mod db;
 mod routes;

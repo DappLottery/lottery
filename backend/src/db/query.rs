@@ -4,11 +4,9 @@ use crate::routes::DbPool;
 use futures::stream::TryStreamExt;
 use mongodb::bson::doc;
 
-
-use crate::db::model::History;
+use crate::db::model::{History, Ticket};
 
 /************* MONGO *************/
-#[cfg(feature = "mongo")]
 pub async fn get_history(conn: &DbPool) -> Result<Vec<History>, ()> {
     let history_coll = conn
         .lock()
@@ -34,4 +32,15 @@ pub async fn insert_history(conn: &DbPool, history: Vec<History>) {
         .collection::<History>("history");
 
     history_coll.insert_many(history, None).await.unwrap();
+}
+
+// Post history
+pub async fn insert_play(conn: &DbPool, plays: Vec<Ticket>) {
+    let game_coll = conn
+        .lock()
+        .unwrap()
+        .database("lottery")
+        .collection::<Ticket>("ticket");
+
+    game_coll.insert_many(plays, None).await.unwrap();
 }
