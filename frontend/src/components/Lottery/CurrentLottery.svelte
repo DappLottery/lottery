@@ -72,6 +72,6 @@
   {:then _}
     <CurrentLotteryInfo bind:lotteryId={lotteryId} bind:numTicketSold={numTicketSold} bind:winMoney={winMoney} />
     <CurrentTicketList bind:myTickets={myTickets} />
-    <BuyTicket fetchData={repeatFetch} />
+    <BuyTicket bind:lotteryId={lotteryId} fetchData={repeatFetch} />
   {/await}
 </div>

@@ -21,7 +21,21 @@
         .on("receipt", function (receipt) {
           ticketNumber = receipt.events.TicketsBought.returnValues.number;
 
+          let lotteryNumber = "";
+          Object.keys(ticketNumber).forEach((prop) => lotteryNumber += prop + "-");
+          lotteryNumber = lotteryNumber.substring(0, lotteryNumber.length - 1);
+
           fetchData();
+
+          let temp = JSON.stringify([
+            // Array of game
+            {
+              game_number: lotteryId,
+              player_address: $selectedAccount,
+              lottery_number: lotteryNumber,
+            },
+          ]);
+          console.log(temp);
 
           fetch(
             "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/game/upload",
@@ -32,7 +46,7 @@
                 {
                   game_number: lotteryId,
                   player_address: $selectedAccount,
-                  lottery_number: ticketNumber,
+                  lottery_number: lotteryNumber,
                 },
               ]),
             }
