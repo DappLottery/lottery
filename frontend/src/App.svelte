@@ -114,8 +114,8 @@
   import InfoNav from "./components/Header/InfoNav.svelte";
   import HistoryNav from "./components/Header/HistoryNav.svelte";
 
-  import CurrentLottery from "./components/LotteryInfo/CurrentLottery.svelte";
-  import PastLottery from "./components/LotteryInfo/PastLottery.svelte";
+  import CurrentLottery from "./components/Lottery/CurrentLottery.svelte";
+  import PastLottery from "./components/Lottery/PastLottery.svelte";
 
   import TicketHistory from "./components/History/TicketHistory.svelte";
 
