@@ -29,6 +29,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .service(lottery::game::get_history)
             .service(lottery::game::post_history)
+            .service(lottery::game::post_game)
+            .service(lottery::game::get_all_ticket)
+            .service(lottery::game::get_ticket_by_addr)
     })
     .bind(lottery::SERVER)?
     .run()

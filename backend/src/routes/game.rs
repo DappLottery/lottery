@@ -72,3 +72,35 @@ pub async fn post_game(params: web::Json<Value>, conn: web::Data<DbPool>) -> imp
         .content_type("application/json")
         .body(r#"{"status": "Post done successfully"}"#)
 }
+
+#[get("/ticket")]
+pub async fn get_all_ticket(conn: web::Data<DbPool>) -> impl Responder {
+    let db = &conn;
+    let result: Vec<Ticket> = match query::get_all_ticket(db).await {
+        Ok(r) => r,
+        Err(_) => Vec::new(),
+    };
+
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(serde_json::to_string(&result).unwrap())
+}
+
+#[get("/ticket/{address}")]
+pub async fn get_ticket_by_addr(
+    path: web::Path<String>,
+    conn: web::Data<DbPool>,
+) -> impl Responder {
+    // println!("{:#?}", params.as_array());
+    let addr = path.into_inner();
+
+    let db = &conn;
+    let result: Vec<Ticket> = match query::get_ticket_by_addr(db, addr).await {
+        Ok(r) => r,
+        Err(_) => Vec::new(),
+    };
+
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(serde_json::to_string(&result).unwrap())
+}
