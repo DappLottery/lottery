@@ -12,6 +12,7 @@
     )
       .then(res => res.json())
       .then(result => (games = result));
+
     console.log(games);
   });
 </script>

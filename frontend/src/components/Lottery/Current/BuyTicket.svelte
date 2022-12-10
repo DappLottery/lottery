@@ -1,12 +1,8 @@
 <script>
-  import {
-    web3,
-    selectedAccount,
-    contracts,
-  } from "svelte-web3";
+  import { web3, selectedAccount, contracts } from "svelte-web3";
 
   export let fetchData;
-
+  export let lotteryId;
   let ticketNumber;
 
   const buyTicket = async () => {
@@ -27,17 +23,27 @@
 
           fetchData();
 
-          console.log("receipt:", receipt);
+          fetch(
+            "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/game/upload",
+            {
+              method: "POST",
+              body: JSON.stringify([
+                // Array of game
+                {
+                  game_number: lotteryId,
+                  player_address: $selectedAccount,
+                  lottery_number: ticketNumber,
+                },
+              ]),
+            }
+          );
+
+          // console.log("receipt:", receipt);
         })
         .on("confirmation", function (confirmationNumber, receipt) {
           console.log("confirmation", confirmationNumber);
         })
         .on("error", console.error); // If a out of gas error, the second parameter is the receipt.;
-      // console.log("tx:", tx);
-      // if (tx.status === true) {
-      //   // getTransactionReceiptMined(tx.transactionHash, 1000);
-      //   console.log(ticketNumber);
-      // }
     } catch (err) {
       console.log(err);
     }
