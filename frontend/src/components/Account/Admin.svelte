@@ -1,16 +1,13 @@
 <script>
-  import {
-    contracts,
-    selectedAccount,
-  } from "svelte-web3";
+  import { contracts, selectedAccount } from "svelte-web3";
 
-	import { useNavigate } from "svelte-navigator";
+  import { useNavigate } from "svelte-navigator";
 
   // export let fetchData;
 
-  let firstWinners;
-  let secondWinners;
-  let thirdWinners;
+  let firstWinners = [];
+  let secondWinners = [];
+  let thirdWinners = [];
 
   const pickWinner = async () => {
     try {
@@ -29,6 +26,22 @@
     }
 
     fetchWinners();
+    // Post history to backend
+
+    await fetch(
+      "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/history/upload",
+      {
+        method: "POST",
+        body: JSON.stringify([
+          // Array of history
+          {
+            first_winner: firstWinners,
+            second_winner: secondWinners,
+            third_winner: thirdWinners,
+          },
+        ]),
+      }
+    );
   };
 
   const resetLottery = async () => {
@@ -39,6 +52,10 @@
     } catch (err) {
       console.log(err);
     }
+
+    firstWinners = [];
+    secondWinners = [];
+    thirdWinners = [];
   };
 
   const fetchWinners = async () => {
@@ -60,7 +77,7 @@
 <div>
   {#await $contracts.Lottery.methods.getOwner().call()}
     there's no account...
-    <br/>
+    <br />
   {:then owner}
     {#if owner.toLowerCase() == $selectedAccount.toLowerCase()}
       Admin Menu
