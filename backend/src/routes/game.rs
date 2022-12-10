@@ -3,11 +3,15 @@ use crate::db::model::History;
 use crate::db::query;
 use crate::routes::DbPool;
 
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use serde_json::Value;
 
 #[get("/history")]
-pub async fn get_history(conn: web::Data<DbPool>) -> impl Responder {
+pub async fn get_history(req: HttpRequest, conn: web::Data<DbPool>) -> impl Responder {
+    if let Some(val) = req.peer_addr() {
+        println!("Address {:?}", val.ip());
+    };
+
     let db = &conn;
     let result: Vec<History> = match query::get_history(db).await {
         Ok(r) => r,

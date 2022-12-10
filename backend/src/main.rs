@@ -12,9 +12,7 @@ async fn main() -> std::io::Result<()> {
 
     // start http server
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .max_age(3600)
-            .allowed_methods(vec!["GET", "POST"]);
+        let cors = Cors::permissive().allowed_origin("http://localhost:5173");
         // let store = MemoryStore::new();
         // .allowed_origin("*")
         // .allowed_methods(vec!["GET", "POST"])
