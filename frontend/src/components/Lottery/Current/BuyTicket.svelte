@@ -22,7 +22,9 @@
           ticketNumber = receipt.events.TicketsBought.returnValues.number;
 
           let lotteryNumber = "";
-          Object.keys(ticketNumber).forEach((prop) => lotteryNumber += prop + "-");
+          Object.keys(ticketNumber).forEach(
+            prop => (lotteryNumber += prop + "-")
+          );
           lotteryNumber = lotteryNumber.substring(0, lotteryNumber.length - 1);
 
           fetchData();
@@ -49,8 +51,11 @@
                   lottery_number: lotteryNumber,
                 },
               ]),
+              headers: {
+                "Content-Type": "application/json",
+              },
             }
-          );
+          ).then(result => result.json());
 
           // console.log("receipt:", receipt);
         })

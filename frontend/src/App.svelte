@@ -33,7 +33,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xf00a913f8887490c394968D73A7933373E804727";
+  const LOTTERY_ON_GANACHE = "0x4d963a9E617533598591E8b749B11C9B20E401ee";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -137,7 +137,7 @@
     <main>
       <Route path="history/*">
         <HistoryNav />
-        
+
         <Route path="lottery/*">
           <Route path="/">
             <LotteryHistory />
@@ -153,7 +153,7 @@
           <Exception defaultPath={"/history/lottery"} />
         </Route>
       </Route>
-  
+
       <Route path="admin/*">
         <Admin />
       </Route>
@@ -162,7 +162,7 @@
         <InfoNav />
 
         <Route path="current">
-          <CurrentLottery bind:lotteryId={lotteryId} />
+          <CurrentLottery bind:lotteryId />
         </Route>
         <Route path="previous">
           <LotteryState bind:currentId={lotteryId} lotteryId={lotteryId - 1} />

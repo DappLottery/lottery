@@ -40,8 +40,11 @@
             third_winner: thirdWinners,
           },
         ]),
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    );
+    ).then(result => result.json());
   };
 
   const resetLottery = async () => {
