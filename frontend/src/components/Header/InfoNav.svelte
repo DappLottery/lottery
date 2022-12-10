@@ -2,6 +2,6 @@
   import { Link } from "svelte-navigator";
 </script>
 
-<Link to="/cur">Current</Link>
+<Link to="/current">Current</Link>
 <span> | </span>
-<Link to="/prev">Previous</Link>
+<Link to="/previous">Previous</Link>
