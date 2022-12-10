@@ -9,6 +9,7 @@
   import TicketBuy from "./TicketBuy.svelte";
   import TicketList from "./TicketList.svelte";
 
+  export let lotteryId;
   let ticketPrice;
   let numTicketSold;
   let winMoney;
@@ -29,6 +30,16 @@
       myTickets = await $contracts.Lottery.methods
         .getTickets($selectedAccount)
         .call();
+      
+      await fetch(
+        "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/history",
+        {
+          method: "GET",
+        }
+      )
+        .then(res => res.json())
+        .then(result => (lotteryId = result.length));
+
     } catch (err) {
       console.log(err);
       throw new Error(err);
