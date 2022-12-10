@@ -115,6 +115,7 @@
   import HistoryNav from "./components/Header/HistoryNav.svelte";
 
   import CurrentLottery from "./components/Lottery/CurrentLottery.svelte";
+  import LotteryState from "./components/Lottery/LotteryState.svelte";
   import PastLottery from "./components/Lottery/PastLottery.svelte";
 
   import TicketHistory from "./components/History/TicketHistory.svelte";
@@ -164,7 +165,7 @@
           <CurrentLottery />
         </Route>
         <Route path="previous">
-          <PastLottery bind:lotteryId={lotteryId} />
+          <LotteryState bind:currentId={lotteryId} lotteryId={lotteryId - 1} />
         </Route>
         <Route path="*">
           <Exception defaultPath={"/current"} />
