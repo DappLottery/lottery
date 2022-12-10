@@ -1,5 +1,5 @@
 #![allow(proc_macro_derive_resolution_fallback)]
-use crate::db::model::History;
+use crate::db::model::{History, Ticket};
 use crate::db::query;
 use crate::routes::DbPool;
 
@@ -22,6 +22,7 @@ pub async fn get_history(req: HttpRequest, conn: web::Data<DbPool>) -> impl Resp
         .content_type("application/json")
         .body(serde_json::to_string(&result).unwrap())
 }
+
 #[post("/history/upload")]
 pub async fn post_history(params: web::Json<Value>, conn: web::Data<DbPool>) -> impl Responder {
     // println!("{:#?}", params.as_array());
@@ -35,6 +36,31 @@ pub async fn post_history(params: web::Json<Value>, conn: web::Data<DbPool>) -> 
                 .collect();
 
             query::insert_history(db, result).await;
+        }
+        None => {
+            return HttpResponse::BadRequest()
+                .content_type("application/json")
+                .body(r#"{"status": "Wrong format"}"#)
+        }
+    }
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(r#"{"status": "Post done successfully"}"#)
+}
+
+#[post("/game/upload")]
+pub async fn post_game(params: web::Json<Value>, conn: web::Data<DbPool>) -> impl Responder {
+    // println!("{:#?}", params.as_array());
+
+    match params.as_array() {
+        Some(obj) => {
+            let db = &conn;
+            let result: Vec<Ticket> = obj
+                .iter()
+                .map(|h| serde_json::from_value(h.to_owned()).unwrap())
+                .collect();
+
+            query::insert_play(db, result).await;
         }
         None => {
             return HttpResponse::BadRequest()
