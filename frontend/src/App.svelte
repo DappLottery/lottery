@@ -150,7 +150,8 @@
   // import MetaMask from "./components/Wallet/MetaMask.svelte";
   // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header/Header.svelte";
-  import InfoNav from "./components/LotteryInfo/InfoNav.svelte";
+  import InfoNav from "./components/Header/InfoNav.svelte";
+  import HistoryNav from "./components/Header/HistoryNav.svelte";
   import CurrentLottery from "./components/LotteryInfo/CurrentLottery.svelte";
   import PastLottery from "./components/LotteryInfo/PastLottery.svelte";
   import Admin from "./components/Account/Admin.svelte";
@@ -169,7 +170,7 @@
     <main>
       <Route basepath="/">
         <InfoNav />
-        
+
         <Route path="prev">
           <PastLottery bind:lotteryId={lotteryId} />
         </Route>
@@ -181,11 +182,26 @@
         </Route>
       </Route>
 
-      <Route path="history">
-        <div></div>
+      <Route path="/history">
+        <HistoryNav />
+        
+        <Route path="lottery/*">
+          <Route path="/">
+            lottery list page
+          </Route>
+          <Route path=":id" let:params>
+            <PastLottery lotteryId={params.id} />
+          </Route>
+        </Route>
+        <Route path="ticket">
+          ticket list page
+        </Route>
+        <Route path="*">
+          <Exception defaultPath={"/lottery"} />
+        </Route>
       </Route>
   
-      <Route path="admin">
+      <Route path="/admin">
         <Admin />
       </Route>
     </main>
