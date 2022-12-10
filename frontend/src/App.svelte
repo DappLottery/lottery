@@ -168,6 +168,29 @@
     <Header />
 
     <main>
+      <Route path="history/*">
+        <HistoryNav />
+        
+        <Route path="lottery">
+          <Route path="/">
+            lottery list page
+          </Route>
+          <Route path=":id" let:params>
+            <PastLottery lotteryId={params.id} />
+          </Route>
+        </Route>
+        <Route path="ticket">
+          ticket list page
+        </Route>
+        <Route path="*">
+          <Exception defaultPath={"/history/lottery"} />
+        </Route>
+      </Route>
+  
+      <Route path="admin/*">
+        <Admin />
+      </Route>
+
       <Route basepath="/">
         <InfoNav />
 
@@ -180,29 +203,6 @@
         <Route path="*">
           <Exception defaultPath={"/cur"} />
         </Route>
-      </Route>
-
-      <Route path="/history">
-        <HistoryNav />
-        
-        <Route path="lottery/*">
-          <Route path="/">
-            lottery list page
-          </Route>
-          <Route path=":id" let:params>
-            <PastLottery lotteryId={params.id} />
-          </Route>
-        </Route>
-        <Route path="ticket">
-          ticket list page
-        </Route>
-        <Route path="*">
-          <Exception defaultPath={"/lottery"} />
-        </Route>
-      </Route>
-  
-      <Route path="/admin">
-        <Admin />
       </Route>
     </main>
   </Router>
