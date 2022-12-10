@@ -86,7 +86,7 @@ pub async fn get_all_ticket(conn: web::Data<DbPool>) -> impl Responder {
         .body(serde_json::to_string(&result).unwrap())
 }
 
-#[get("/ticket/{address}")]
+#[get("/ticket/addr/{address}")]
 pub async fn get_ticket_by_addr(
     path: web::Path<String>,
     conn: web::Data<DbPool>,
@@ -96,6 +96,22 @@ pub async fn get_ticket_by_addr(
 
     let db = &conn;
     let result: Vec<Ticket> = match query::get_ticket_by_addr(db, addr).await {
+        Ok(r) => r,
+        Err(_) => Vec::new(),
+    };
+
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(serde_json::to_string(&result).unwrap())
+}
+
+#[get("/ticket/game/{number}")]
+pub async fn get_ticket_by_number(path: web::Path<i32>, conn: web::Data<DbPool>) -> impl Responder {
+    // println!("{:#?}", params.as_array());
+    let game = path.into_inner();
+
+    let db = &conn;
+    let result: Vec<Ticket> = match query::get_ticket_by_game(db, game).await {
         Ok(r) => r,
         Err(_) => Vec::new(),
     };
