@@ -70,7 +70,7 @@
   {#await fetchData()}
     Fetching contract dataset...
   {:then _}
-    <CurrentLotteryInfo bind:numTicketSold={numTicketSold} bind:winMoney={winMoney} />
+    <CurrentLotteryInfo bind:lotteryId={lotteryId} bind:numTicketSold={numTicketSold} bind:winMoney={winMoney} />
     <CurrentTicketList bind:myTickets={myTickets} />
     <BuyTicket fetchData={repeatFetch} />
   {/await}

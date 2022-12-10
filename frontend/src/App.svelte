@@ -162,7 +162,7 @@
         <InfoNav />
 
         <Route path="current">
-          <CurrentLottery />
+          <CurrentLottery bind:lotteryId={lotteryId} />
         </Route>
         <Route path="previous">
           <LotteryState bind:currentId={lotteryId} lotteryId={lotteryId - 1} />

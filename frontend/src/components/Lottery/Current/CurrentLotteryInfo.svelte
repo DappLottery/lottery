@@ -6,8 +6,7 @@
 
   export let numTicketSold;
   export let winMoney;
-
-  let lotteryId = 0;
+  export let lotteryId;
   let finishDate;
   let nowDate;
   let remainTime = {
