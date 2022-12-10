@@ -150,6 +150,7 @@
   // import MetaMask from "./components/Wallet/MetaMask.svelte";
   // import LoginTest from "./components/Wallet/LoginTest.svelte";
   import Header from "./components/Header/Header.svelte";
+  import InfoNav from "./components/LotteryInfo/InfoNav.svelte";
   import CurrentLottery from "./components/LotteryInfo/CurrentLottery.svelte";
   import PastLottery from "./components/LotteryInfo/PastLottery.svelte";
   import Admin from "./components/Account/Admin.svelte";
@@ -167,6 +168,8 @@
 
     <main>
       <Route basepath="/">
+        <InfoNav />
+        
         <Route path="prev">
           <PastLottery bind:lotteryId={lotteryId} />
         </Route>
