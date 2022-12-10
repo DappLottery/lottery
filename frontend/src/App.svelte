@@ -160,14 +160,14 @@
       <Route basepath="/">
         <InfoNav />
 
-        <Route path="prev">
-          <PastLottery bind:lotteryId={lotteryId} />
-        </Route>
-        <Route path="cur">
+        <Route path="current">
           <CurrentLottery />
         </Route>
+        <Route path="previous">
+          <PastLottery bind:lotteryId={lotteryId} />
+        </Route>
         <Route path="*">
-          <Exception defaultPath={"/cur"} />
+          <Exception defaultPath={"/current"} />
         </Route>
       </Route>
     </main>
