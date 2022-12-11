@@ -1,4 +1,6 @@
 <script>
+  import { web3 } from "svelte-web3";
+
   export let lotteryId;
   let lotteryInfo;
 
@@ -30,7 +32,7 @@
         <br/>
         {`판매수량 : ${lotteryInfo.ticket_sold}개`}
         <br/>
-        {`판매액 : ${lotteryInfo.game_money} ETH`}
+        {`판매액 : ${$web3.utils.fromWei(lotteryInfo.game_money.toString(), "ether")} ETH`}
         <br/>
         {`당첨 번호 : ${lotteryInfo.lucky_number}`}
         <br/>
