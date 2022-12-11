@@ -33,12 +33,12 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xe2C3662e046a7b627E098e0F6568EeE612550554";
+  const LOTTERY_ON_GANACHE = "0x87BaB9dF65Da3ae4Dc989e03B99bB42807e63EaC";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
   let pending = false;
-  let lotteryId = 0;
+  let lotteryId = -1;
 
   const connect = async () => {
     pending = true;
