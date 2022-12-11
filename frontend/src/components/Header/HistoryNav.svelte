@@ -4,4 +4,6 @@
 
 <Link to="/history/lottery">Lottery</Link>
 <span> | </span>
-<Link to="/history/ticket">Ticket</Link>
+<Link to="/history/ticket/all">Ticket</Link>
+<span> | </span>
+<Link to="/history/ticket/my">My Ticket</Link>

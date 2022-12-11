@@ -33,7 +33,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0xE696E76c5631D7ddC99ae0910bc0C87d73eD36d4";
+  const LOTTERY_ON_GANACHE = "0x390A281F9948D5cD734c87890dB5F00Eb2F9CB69";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
@@ -119,6 +119,7 @@
 
   import LotteryHistory from "./components/History/LotteryHistory.svelte";
   import TicketHistory from "./components/History/TicketHistory.svelte";
+  import MyTicketHistory from "./components/History/MyTicketHistory.svelte";
 
   import Admin from "./components/Account/Admin.svelte";
 
@@ -146,8 +147,16 @@
             <LotteryState bind:currentId={lotteryId} lotteryId={params.id} />
           </Route>
         </Route>
-        <Route path="ticket">
-          <TicketHistory />
+        <Route path="ticket/*">
+          <Route path="all">
+            <TicketHistory />
+          </Route>
+          <Route path="my">
+            <MyTicketHistory />
+          </Route>
+          <Route path="*">
+            <Exception defaultPath={"/history/ticket/all"} />
+          </Route>
         </Route>
         <Route path="*">
           <Exception defaultPath={"/history/lottery"} />

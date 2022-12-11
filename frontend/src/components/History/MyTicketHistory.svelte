@@ -1,11 +1,12 @@
 <script>
+  import { selectedAccount } from 'svelte-web3';
   import SvelteTable from 'svelte-table';
 	import { onMount } from "svelte";
 
   let rows = [];
   onMount(async () => {
     await fetch(
-      "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/ticket",
+      `http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/ticket/addr/${$selectedAccount}`,
       {
         method: "GET",
       }
@@ -15,7 +16,6 @@
     console.log(rows);
   });
 
-	// TODO: lottery state href
 	// define column configs
 	const columns = [
 		{

@@ -1,8 +1,8 @@
 <script>
-  import { onMount } from "svelte";
+  import SvelteTable from 'svelte-table';
+	import { onMount } from "svelte";
 
-  let games = [];
-
+  let rows = [];
   onMount(async () => {
     await fetch(
       "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/history",
@@ -11,18 +11,46 @@
       }
     )
       .then(res => res.json())
-      .then(result => (games = result));
+      .then(result => {
+        rows = result;
+        rows.forEach((object, i) => {
+          object.id = i;
+        });
+      });
 
-    console.log(games);
+    console.log(rows);
   });
+
+	// define column configs
+	const columns = [
+		{
+			key: "LotteryID",
+			title: "LotteryID",
+			value: v => v.id,
+			sortable: true,
+		},
+		{
+			key: "TicketSold",
+			title: "TicketSold",
+			value: v => v.ticket_sold,
+			sortable: true,
+		},
+		{
+			key: "GameMoney",
+			title: "GameMoney",
+			value: v => v.game_money,
+			sortable: true,
+		},
+		{
+			key: "LuckyNumber",
+			title: "LuckyNumber",
+			value: v => v.lucky_number,
+			sortable: true,
+		},
+	];
 </script>
 
-<div class="lotto-hist">
-  <ul>
-    {#each games as game}
-      <li>
-        {game.id} | {game.first_winner}
-      </li>
-    {/each}
-  </ul>
-</div>
+<SvelteTable columns="{columns}" rows="{rows}"></SvelteTable>
+
+<style>
+</style>
