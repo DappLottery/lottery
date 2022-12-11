@@ -290,6 +290,7 @@ contract Lottery {
         for (uint256 i = 0; i < players.length; i++) {
             Player storage player = players[i];
             playerChecks[player.addr] = false;
+            delete ticketMap[player.addr];
         }
         delete players;
         // TODO mapping reset?
