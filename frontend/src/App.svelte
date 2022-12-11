@@ -39,6 +39,14 @@
 
   let pending = false;
   let lotteryId = -1;
+  fetch(
+    "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/history",
+    {
+      method: "GET",
+    }
+  )
+    .then(res => res.json())
+    .then(result => (lotteryId = result.length));
 
   const connect = async () => {
     pending = true;
