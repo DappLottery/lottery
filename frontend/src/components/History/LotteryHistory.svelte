@@ -1,4 +1,5 @@
 <script>
+	import { web3 } from "svelte-web3";
   import SvelteTable from 'svelte-table';
 	import { onMount } from "svelte";
 
@@ -38,7 +39,7 @@
 		{
 			key: "GameMoney",
 			title: "GameMoney",
-			value: v => v.game_money,
+			value: v => $web3.utils.fromWei(v.game_money.toString(), "ether"),
 			sortable: true,
 		},
 		{
