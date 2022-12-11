@@ -26,9 +26,6 @@
         await $contracts.Lottery.methods.getWinMoney().call(),
         "ether"
       );
-      myTickets = await $contracts.Lottery.methods
-        .getTickets($selectedAccount)
-        .call();
       
       await fetch(
         "http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/history",
@@ -39,6 +36,14 @@
         .then(res => res.json())
         .then(result => (lotteryId = result.length));
 
+      await fetch(
+        `http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/ticket/game/${lotteryId}`,
+        {
+          method: "GET",
+        }
+      )
+        .then(res => res.json())
+        .then(result => (myTickets = result));
     } catch (err) {
       console.log(err);
       throw new Error(err);
@@ -52,18 +57,20 @@
         await $contracts.Lottery.methods.getWinMoney().call(),
         "ether"
       );
-      myTickets = await $contracts.Lottery.methods
-        .getTickets($selectedAccount)
-        .call();
+
+      await fetch(
+        `http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/ticket/game/${lotteryId}`,
+        {
+          method: "GET",
+        }
+      )
+        .then(res => res.json())
+        .then(result => (myTickets = result));
     } catch (err) {
       console.log(err);
       throw new Error(err);
     }
   };
-
-  setInterval(() => {
-    repeatFetch();
-  }, 30 * 1000);
 </script>
 
 <div class="cur-lottery">
@@ -71,7 +78,7 @@
     Fetching contract dataset...
   {:then _}
     <CurrentLotteryInfo bind:lotteryId={lotteryId} bind:numTicketSold={numTicketSold} bind:winMoney={winMoney} />
-    <CurrentTicketList bind:myTickets={myTickets} />
+    <CurrentTicketList bind:rows={myTickets} />
     <BuyTicket bind:lotteryId={lotteryId} fetchData={repeatFetch} />
   {/await}
 </div>

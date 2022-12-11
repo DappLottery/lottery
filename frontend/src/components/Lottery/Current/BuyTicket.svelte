@@ -23,7 +23,7 @@
 
           let lotteryNumber = "";
           Object.keys(ticketNumber).forEach(
-            prop => (lotteryNumber += prop + "-")
+            prop => (lotteryNumber += ticketNumber[prop] + "-")
           );
           lotteryNumber = lotteryNumber.substring(0, lotteryNumber.length - 1);
 

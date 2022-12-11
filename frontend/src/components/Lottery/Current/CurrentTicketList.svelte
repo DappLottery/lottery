@@ -1,39 +1,73 @@
 <script>
-  export let myTickets;
+  import SvelteTable from 'svelte-table';
+  
+  export let rows;
+
+	// define column configs
+	const columns = [
+		{
+			key: "LotteryId",
+			title: "LotteryId",
+			value: v => v.game_number,
+			filterOptions: rows => {
+				let nums = {};
+				rows.forEach(row => {
+					let num = row.game_number;
+					if (nums[num] === undefined)
+						nums[num] = {name: num, value: num};
+				});
+				// fix order
+				nums = Object.entries(nums)
+					.sort()
+					.reduce((o, [k, v]) => ((o[k] = v), o), {});
+				return Object.values(nums);
+			},
+			filterValue: v => v.game_number,
+			sortable: true,
+		},
+		{
+			key: "PlayerAddr",
+			title: "PlayerAddr",
+			value: v => v.player_address,
+			filterOptions: rows => {
+				let nums = {};
+				rows.forEach(row => {
+					let num = row.player_address;
+					if (nums[num] === undefined)
+						nums[num] = {name: num, value: num};
+				});
+				// fix order
+				nums = Object.entries(nums)
+					.sort()
+					.reduce((o, [k, v]) => ((o[k] = v), o), {});
+				return Object.values(nums);
+			},
+			filterValue: v => v.player_address.toLowerCase(),
+			sortable: true,
+		},
+		{
+			key: "LotteryNumber",
+			title: "LotteryNumber",
+			value: v => v.lottery_number,
+			sortable: true,
+		}
+	];
 </script>
 
-<div>
-  <br />
-  List of mytickets
-  <br />
-  <br />
-  <div class="ticket-info-list">
-    <table
-      border="1"
-      bordercolor="white"
-      width="700"
-      height="100"
-      align="center"
-    >
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Ticket ID</th>
-          <th>Ticket Number</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each myTickets as myTicket, i}
-        <tr>
-            <th scope="row">{i+1}</th>
-            <td>{myTicket.id}</td>
-            <td>{myTicket.number}</td>
-        </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
-</div>
+<SvelteTable columns="{columns}" rows="{rows}"></SvelteTable>
 
 <style>
+	:global(tbody) {
+		height:250px;
+		overflow:auto;
+		display: block;
+	}
+	:global(thead, tbody tr) {
+		display:table;
+		width:100%;
+		table-layout:fixed;
+	}
+	:global(th:nth-child(4), td:nth-child(4)) {
+		width: 60%;
+	}
 </style>
