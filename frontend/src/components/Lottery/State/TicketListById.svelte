@@ -1,7 +1,21 @@
 <script>
   import SvelteTable from 'svelte-table';
-  
-  export let rows;
+  import { onMount } from "svelte";
+
+  export let lotteryId;
+
+  let rows = [];
+  onMount(async () => {
+    await fetch(
+      `http://ec2-3-39-168-175.ap-northeast-2.compute.amazonaws.com:8010/ticket/game/${lotteryId}`,
+      {
+        method: "GET",
+      }
+    )
+      .then(res => res.json())
+      .then(result => (rows = result));
+    console.log(rows);
+  });
 
 	// define column configs
 	const columns = [

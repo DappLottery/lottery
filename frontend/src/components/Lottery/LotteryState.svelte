@@ -1,5 +1,8 @@
 <script>
   import { useNavigate } from "svelte-navigator";
+
+  import LotteryInfoById from "./State/LotteryInfoById.svelte";
+  import TicketListById from "./State/TicketListById.svelte";
   
   export let currentId;  // current lottery id
   export let lotteryId;
@@ -13,7 +16,7 @@
   {:else if lotteryId == currentId}
     {navigate("/current")}
   {:else}
-    <span>{lotteryId}</span>
-    <span>{typeof lotteryId}</span>
+    <LotteryInfoById {lotteryId} />
+    <TicketListById {lotteryId} />
   {/if}
 </div>
