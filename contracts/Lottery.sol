@@ -232,7 +232,6 @@ contract Lottery {
 
     function sendMoney() public payable restricted enoughLottery {
         actualPrice = (contractBalance / 100) * cutRate; // 75%, fixed point도 없음;
-        contractBalance -= actualPrice;
 
         if (firstWinner == 0) {
             nextGameBalance += (actualPrice / 100) * 70;
@@ -281,6 +280,7 @@ contract Lottery {
         lotteryStart = block.timestamp;
         lotteryEnd = lotteryStart + lotteryDuration;
 
+        contractBalance -= actualPrice;
         contractBalance += nextGameBalance;
         nextGameBalance = 0;
 
@@ -290,6 +290,7 @@ contract Lottery {
         for (uint256 i = 0; i < players.length; i++) {
             Player storage player = players[i];
             playerChecks[player.addr] = false;
+            delete ticketMap[player.addr];
         }
         delete players;
         // TODO mapping reset?
