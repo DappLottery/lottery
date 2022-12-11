@@ -2,6 +2,10 @@
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct History {
+    pub manager: String,
+    pub ticket_sold: i32,
+    pub game_money: i32,
+    pub lucky_number: String,
     // #[serde(skip_serializing_if = "Option::is_none")]
     pub first_winner: Vec<String>,
     // #[serde(skip_serializing_if = "Option::is_none")]

@@ -69,6 +69,25 @@ pub async fn get_ticket_by_addr(conn: &DbPool, addr: String) -> Result<Vec<Ticke
     Ok(result)
 }
 
+pub async fn get_ticket_by_game(conn: &DbPool, number: i32) -> Result<Vec<Ticket>, ()> {
+    let game_coll = conn
+        .lock()
+        .unwrap()
+        .database("lottery")
+        .collection::<Ticket>("ticket");
+
+    let mut ticket = game_coll
+        .find(doc! {"game_number": number}, None)
+        .await
+        .unwrap();
+    let mut result: Vec<Ticket> = Vec::new();
+    while let Some(h) = ticket.try_next().await.unwrap() {
+        result.push(h);
+    }
+
+    Ok(result)
+}
+
 // Post history
 pub async fn insert_play(conn: &DbPool, plays: Vec<Ticket>) {
     let game_coll = conn

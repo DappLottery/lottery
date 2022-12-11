@@ -32,6 +32,7 @@ async fn main() -> std::io::Result<()> {
             .service(lottery::game::post_game)
             .service(lottery::game::get_all_ticket)
             .service(lottery::game::get_ticket_by_addr)
+            .service(lottery::game::get_ticket_by_number)
     })
     .bind(lottery::SERVER)?
     .run()
