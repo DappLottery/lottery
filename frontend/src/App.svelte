@@ -33,7 +33,7 @@
 
   import LOTTERY from "./abis/Lottery.json";
 
-  const LOTTERY_ON_GANACHE = "0x390A281F9948D5cD734c87890dB5F00Eb2F9CB69";
+  const LOTTERY_ON_GANACHE = "0xe2C3662e046a7b627E098e0F6568EeE612550554";
 
   evm.attachContract("Lottery", LOTTERY_ON_GANACHE, LOTTERY.abi);
 
