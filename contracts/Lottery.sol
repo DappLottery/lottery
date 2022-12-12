@@ -283,6 +283,13 @@ contract Lottery {
         contractBalance -= actualPrice;
         contractBalance += nextGameBalance;
         nextGameBalance = 0;
+        
+        firstWinner = 0;
+        secondWinner = 0;
+        thirdWinner = 0;
+        delete firstWinners;
+        delete secondWinners;
+        delete thirdWinners;
 
         lastLotteryId = lotteryId;
         lotteryId = 0;
