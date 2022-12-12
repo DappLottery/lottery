@@ -1,6 +1,5 @@
 <script>
 	import { web3 } from "svelte-web3";
-  import SvelteTable from 'svelte-table';
 	import { onMount } from "svelte";
 	import { useNavigate } from "svelte-navigator";
 
@@ -47,7 +46,7 @@
 			<tr>
 				<th scope="row" on:click={() => navigate(`${i}`)}>{i}</th>
 				<td>{myTicket.ticket_sold}</td>
-				<td>{myTicket.game_money}</td>
+				<td>{$web3.utils.fromWei(myTicket.game_money.toString(), "ether")}</td>
 				<td>{myTicket.lucky_number}</td>
 			</tr>
 		{/each}
