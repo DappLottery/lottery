@@ -45,7 +45,7 @@
 	<tbody>
 		{#each myTickets as myTicket, i}
 			<tr>
-				<th scope="row" on:click={() => navigate(`${i}`)}>{i + 1}</th>
+				<th scope="row" on:click={() => navigate(`${i}`)}>{i}</th>
 				<td>{myTicket.ticket_sold}</td>
 				<td>{myTicket.game_money}</td>
 				<td>{myTicket.lucky_number}</td>
