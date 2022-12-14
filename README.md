@@ -1,24 +1,45 @@
-# dApp Lottery
+<div align="center">
+<p>
+    <img width="380" height="300" src="https://user-images.githubusercontent.com/2356749/207507444-e338d9e6-516e-4ec6-8876-880696cc667f.png">
+</p>
+<h1>DApp Lottery</h1>
 
-# Features
+<h3>Embedded Software Team 5</h3>
+</div>
 
-- buyTicket():
-- pickWinner():
-- sendMoney():
-- resetLottery():
-- generateRandomNumber(): keccak256
+## Requirements
 
-# ToDo
+- lang: [Rust](https://www.rust-lang.org/) (backend) + [Svelte](https://svelte.dev/) (Frontend) + [Solidity](https://docs.soliditylang.org/) (Smart Contract)
+- stack: AWS EC2 + MongoDB + [Ganache](https://trufflesuite.com/ganache/) + [MetaMask](https://metamask.io/)
 
-- Smart Contract
-  - if possible, chainlink VRF to produce unpredictable real random number
-  - more test cases
-  
-- Frontend
-  - UI
-  - interact with Smart Contract
-  - connect MetaMask
-  - test cases
-  
-- Backend
-  - 역대 기록들을 컨트랙트에 저장하지 말고 DB 서버에 저장하는 것이 나을 듯 (more gas fee possible)
+```bash
+export LOTTERY_DB="private mongodb addr"
+export LOTTERY_EC2="private ec2 addr"
+export GANACHE="ganache addr"
+```
+
+```console
+ubuntu:~$ cd backend && rustup override set nightly && cargo run --release
+
+ubuntu:~$ cd frontend && yarn install && yarn dev --host
+
+ubuntu:~$ truffle migrate --network dev
+```
+
+## Frontend
+
+* Svelte
+* ViteJS
+
+## Backend
+
+* Rust [actix-rs](https://actix.rs/)
+* Rust [kakao-rs](https://github.com/Alfex4936/kakao-rs)
+* MongoDB
+
+## Limitations
+
+- Cannot run ChainLink VRF v2 to use provably fair RNG
+  - But we assume our implementation is hard to exploit as we generate the lottery number when the admin clicks the `Pick Winner` button.
+  - On the call, it generates on the fly and sends money right away. No one can see the number before finishing the game.
+  - The estimated gas fee to call of this library is about $4.
