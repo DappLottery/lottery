@@ -906,6 +906,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "kakao-rs"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5572e268722c22c1af4fede0ac885822311218e68fc95463c5356a730a1f0c07"
+dependencies = [
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
 name = "language-tags"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -984,6 +995,7 @@ dependencies = [
  "actix-rt",
  "actix-web",
  "futures",
+ "kakao-rs",
  "mongodb",
  "serde",
  "serde_derive",

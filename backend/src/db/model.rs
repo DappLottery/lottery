@@ -17,7 +17,7 @@ pub struct History {
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Ticket {
     // #[serde(skip_serializing_if = "Option::is_none")]
-    pub game_number: i32,
+    pub game_number: u32,
     // #[serde(skip_serializing_if = "Option::is_none")]
     pub player_address: String,
     // #[serde(skip_serializing_if = "Option::is_none")]

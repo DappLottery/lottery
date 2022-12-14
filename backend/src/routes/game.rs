@@ -106,7 +106,7 @@ pub async fn get_ticket_by_addr(
 }
 
 #[get("/ticket/game/{number}")]
-pub async fn get_ticket_by_number(path: web::Path<i32>, conn: web::Data<DbPool>) -> impl Responder {
+pub async fn get_ticket_by_number(path: web::Path<u32>, conn: web::Data<DbPool>) -> impl Responder {
     // println!("{:#?}", params.as_array());
     let game = path.into_inner();
 

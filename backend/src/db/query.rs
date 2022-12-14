@@ -69,7 +69,7 @@ pub async fn get_ticket_by_addr(conn: &DbPool, addr: String) -> Result<Vec<Ticke
     Ok(result)
 }
 
-pub async fn get_ticket_by_game(conn: &DbPool, number: i32) -> Result<Vec<Ticket>, ()> {
+pub async fn get_ticket_by_game(conn: &DbPool, number: u32) -> Result<Vec<Ticket>, ()> {
     let game_coll = conn
         .lock()
         .unwrap()

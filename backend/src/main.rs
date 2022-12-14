@@ -33,6 +33,9 @@ async fn main() -> std::io::Result<()> {
             .service(lottery::game::get_all_ticket)
             .service(lottery::game::get_ticket_by_addr)
             .service(lottery::game::get_ticket_by_number)
+            //
+            .service(lottery::kakao::get_ticket_on_kakao)
+            .service(lottery::kakao::get_game_status)
     })
     .bind(lottery::SERVER)?
     .run()

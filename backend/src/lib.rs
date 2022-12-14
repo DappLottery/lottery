@@ -16,5 +16,6 @@ mod routes;
 
 pub use db::mongo;
 pub use routes::game;
+pub use routes::kakao;
 
 pub const SERVER: &str = "0.0.0.0:8010";
