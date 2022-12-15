@@ -1,10 +1,12 @@
 <div align="center">
+
 <p>
     <img width="380" height="300" src="https://user-images.githubusercontent.com/2356749/207507444-e338d9e6-516e-4ec6-8876-880696cc667f.png">
 </p>
 <h1>DApp Lottery</h1>
 
 <h3>Embedded Software Team 5</h3>
+    <ul><li>최석원 (<a target="_blank" rel="noopener" href="https://github.com/Alfex4936">@Alfex4936</a>)</li><li>이근호 (<a target="_blank" rel="noopener" href="https://github.com/RootLEE2">@RootLEE2</a>)</li><li>이한식 (<a target="_blank" rel="noopener" href="https://github.com/leehansik">@leehansik</a>)</li></ul>
 </div>
 
 ## Requirements
