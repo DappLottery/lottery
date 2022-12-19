@@ -42,6 +42,6 @@ ubuntu:~$ truffle migrate --network dev
 ## Limitations
 
 - Cannot run ChainLink VRF v2 to use provably fair RNG
-  - But we assume our implementation is hard to exploit as we generate the lottery number when the admin clicks the `Pick Winner` button.
-  - On the call, it generates on the fly and sends money right away. No one can see the number before finishing the game.
+  - However, our implementation is hard to exploit as we generate the lottery number when the admin clicks the Pick Winner button.
+  - On the call, it generates on the fly and sends money right away. No one can see the number before the game finishes.
   - The estimated gas fee to call of this library is about $4.
