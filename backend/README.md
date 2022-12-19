@@ -1,5 +1,8 @@
 # Dapp Lottery Backend
 
+<code><img height="50" src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/rust/rust.png"></code>
+<code><img height="50" src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/mongodb/mongodb.png"></code>
+
 ## Welcome to the Dapp Lottery Backend project!
 
 This project is a backend system for a Dapp lottery application, built using the Rust programming language, MongoDB for data storage, and a Kakao chatbot for user convenience.
