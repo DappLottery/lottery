@@ -106,7 +106,7 @@ Retrieves a list of all game ticket records from the database.
 ## GET /ticket/addr/{address}
 Retrieves a list of game ticket records for the specified Ethereum address. The address parameter should be a valid Ethereum address.
 
-### Example request: /ticket/addr/0x123...
+### Example request: /ticket/addr/0x5541e...
 
 ### Example response:
 
@@ -138,17 +138,17 @@ Retrieves a list of game ticket records for the specified game number. The numbe
 
 ```json
 [{
-   "game_number": 1,
+   "game_number": 3,
    "player_address": "0xff5541e...",
    "lottery_number": "1-5-3-4-5-3"
 },
 {
-   "game_number": 1,
+   "game_number": 3,
    "player_address": "0xeeeq1f41e...",
    "lottery_number": "6-5-3-4-5-3"
 },
 {
-   "game_number": 1,
+   "game_number": 3,
    "player_address": "0xasdf5541e...",
    "lottery_number": "4-3-2-1-5-3"
 }]
